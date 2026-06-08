@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sage — Kyle's Task Manager</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500&display=swap');
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: #E8E4DC;
+    --text: #1A1A18;
+    --muted: #8A8778;
+    --accent: #3D6B4F;
+    --accent-light: #EAF1EC;
+    --danger: #C0392B;
+    --warn: #D4882A;
+    --bucket-admin: #4A6FA5;
+    --bucket-house: #7B5EA7;
+    --bucket-family: #C0392B;
+    --bucket-bufala: #2E86AB;
+    --bucket-regen: #3D6B4F;
+    --bucket-personal: #D4882A;
+    --bucket-building: #555555;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--text);
+    color: white;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  header .subtitle {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .header-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .sync-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+  }
+  .sync-btn:hover { background: rgba(255,255,255,0.2); }
+
+  .sheet-link {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+  .sheet-link:hover { color: rgba(255,255,255,0.7); }
+
+  /* LAYOUT */
+  .app {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100vh - 60px);
+  }
+
+  /* SIDEBAR */
+  sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky;
+    top: 60px;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+
+  .sidebar-section {
+    margin-bottom: 8px;
+  }
+
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 20px 8px;
+  }
+
+  .bucket-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border-left: 3px solid transparent;
+  }
+
+  .bucket-item:hover { background: var(--bg); }
+  .bucket-item.active {
+    background: var(--accent-light);
+    border-left-color: var(--accent);
+  }
+
+  .bucket-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .bucket-name {
+    flex: 1;
+    font-weight: 500;
+    font-size: 13px;
+  }
+
+  .bucket-count {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--bg);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+
+  /* MAIN */
+  main {
+    padding: 24px 28px;
+    max-width: 900px;
+  }
+
+  .main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .main-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 500;
+  }
+
+  .main-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  select, input[type="text"] {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+  }
+  select:focus, input:focus { border-color: var(--accent); }
+
+  .add-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    transition: opacity 0.15s;
+  }
+  .add-btn:hover { opacity: 0.88; }
+
+  /* STATS ROW */
+  .stats-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    flex: 1;
+  }
+
+  .stat-value {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  /* TASK TABLE */
+  .task-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .task-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .task-section-header:hover { background: #F0EDE6; }
+
+  .section-bucket-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-weight: 600;
+    font-size: 13px;
+    flex: 1;
+  }
+
+  .section-chevron {
+    color: var(--muted);
+    font-size: 11px;
+    transition: transform 0.2s;
+  }
+  .section-chevron.collapsed { transform: rotate(-90deg); }
+
+  .task-list { }
+
+  .task-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 80px 70px 90px 28px;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .task-row:last-child { border-bottom: none; }
+  .task-row:hover { background: #FAFAF8; }
+  .task-row.done { opacity: 0.45; }
+  .task-row.done .task-title { text-decoration: line-through; }
+
+  .task-check {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .task-title {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .task-type {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  .priority-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--danger);
+    text-align: center;
+  }
+  .priority-blank { visibility: hidden; }
+
+  .task-due {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .task-delete {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    padding: 2px;
+  }
+  .task-row:hover .task-delete { opacity: 0.5; }
+  .task-delete:hover { opacity: 1 !important; color: var(--danger); }
+
+  /* ADD TASK FORM */
+  .add-form {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-direction: column;
+  }
+  .add-form.visible { display: flex; }
+
+  .form-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .form-row input, .form-row select {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .cancel-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* LOADING / EMPTY */
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--text);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.25s;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* SEARCH */
+  .search-input {
+    width: 200px;
+  }
+
+  /* COLUMN HEADERS */
+  .task-header {
+    display: grid;
+    grid-template-columns: 28px 1fr 80px 70px 90px 28px;
+    gap: 8px;
+    padding: 7px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #FAFAF8;
+  }
+  .task-header span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Sage</h1>
+    <div class="subtitle">Kyle's Task Manager</div>
+  </div>
+  <div class="header-right">
+    <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/17sGkXNtDCTUlOWWd9u8I5ZWH7IPfgOsNwkbMWllKNY4" target="_blank">Open in Sheets ↗</a>
+    <button class="sync-btn" onclick="loadTasks()">↻ Sync</button>
+  </div>
+</header>
+
+<div class="app">
+  <sidebar id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">View</div>
+      <div class="bucket-item active" data-bucket="All" onclick="selectBucket('All', this)">
+        <div class="bucket-dot" style="background:#888"></div>
+        <span class="bucket-name">All Tasks</span>
+        <span class="bucket-count" id="count-All">–</span>
+      </div>
+      <div class="bucket-item" data-bucket="High Priority" onclick="selectBucket('High Priority', this)">
+        <div class="bucket-dot" style="background:var(--danger)"></div>
+        <span class="bucket-name">Priority</span>
+        <span class="bucket-count" id="count-High Priority">–</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Buckets</div>
+      <div class="bucket-item" data-bucket="Admin" onclick="selectBucket('Admin', this)">
+        <div class="bucket-dot" style="background:var(--bucket-admin)"></div>
+        <span class="bucket-name">Admin</span>
+        <span class="bucket-count" id="count-Admin">–</span>
+      </div>
+      <div class="bucket-item" data-bucket="Family" onclick="selectBucket('Family', this)">
+        <div class="bucket-dot" style="background:var(--bucket-family)"></div>
+        <span class="bucket-name">Family</span>
+        <span class="bucket-count" id="count-Family">–</span>
+      </div>
+      <div class="bucket-item" data-bucket="House" onclick="selectBucket('House', this)">
+        <div class="bucket-dot" style="background:var(--bucket-house)"></div>
+        <span class="bucket-name">House</span>
+        <span class="bucket-count" id="count-House">–</span>
+      </div>
+      <div class="bucket-item" data-bucket="Bufala" onclick="selectBucket('Bufala', this)">
+        <div class="bucket-dot" style="background:var(--bucket-bufala)"></div>
+        <span class="bucket-name">Bufala</span>
+        <span class="bucket-count" id="count-Bufala">–</span>
+      </div>
+      <div class="bucket-item" data-bucket="Regen Ag" onclick="selectBucket('Regen Ag', this)">
+        <div class="bucket-dot" style="background:var(--bucket-regen)"></div>
+        <span class="bucket-name">Regen Ag</span>
+        <span class="bucket-count" id="count-Regen Ag">–</span>
+      </div>
+      <div class="bucket-item" data-bucket="Personal" onclick="selectBucket('Personal', this)">
+        <div class="bucket-dot" style="background:var(--bucket-personal)"></div>
+        <span class="bucket-name">Personal</span>
+        <span class="bucket-count" id="count-Personal">–</span>
+      </div>
+      <div class="bucket-item" data-bucket="Building" onclick="selectBucket('Building', this)">
+        <div class="bucket-dot" style="background:var(--bucket-building)"></div>
+        <span class="bucket-name">Building</span>
+        <span class="bucket-count" id="count-Building">–</span>
+      </div>
+    </div>
+  </sidebar>
+
+  <main>
+    <div class="main-header">
+      <div class="main-title" id="main-title">All Tasks</div>
+      <div class="main-controls">
+        <input type="text" class="search-input" placeholder="Search tasks…" oninput="renderTasks()" id="search">
+        <select id="filter-status" onchange="renderTasks()">
+          <option value="Open">Open</option>
+          <option value="Done">Done</option>
+          <option value="">All</option>
+        </select>
+        <select id="filter-type" onchange="renderTasks()">
+          <option value="">All types</option>
+          <option value="Task">Tasks</option>
+          <option value="Project">Projects</option>
+        </select>
+        <button class="add-btn" onclick="toggleAddForm()">+ Add</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-open">–</div>
+        <div class="stat-label">Open</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-high">–</div>
+        <div class="stat-label">Priority</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-done">–</div>
+        <div class="stat-label">Done</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-projects">–</div>
+        <div class="stat-label">Projects</div>
+      </div>
+    </div>
+
+    <!-- Add Form -->
+    <div class="add-form" id="add-form">
+      <div class="form-row">
+        <input type="text" id="new-title" placeholder="Task title…" style="flex:2">
+        <select id="new-bucket">
+          <option value="Admin">Admin</option>
+          <option value="Family">Family</option>
+          <option value="House">House</option>
+          <option value="Bufala">Bufala</option>
+          <option value="Regen Ag">Regen Ag</option>
+          <option value="Personal">Personal</option>
+          <option value="Building">Building</option>
+        </select>
+        <select id="new-type">
+          <option value="Task">Task</option>
+          <option value="Project">Project</option>
+        </select>
+        <select id="new-priority">
+          <option value="">No priority</option>
+          <option value="Priority">Priority</option>
+        </select>
+        <input type="text" id="new-due" placeholder="Due date (optional)">
+      </div>
+      <div class="form-actions">
+        <button class="cancel-btn" onclick="toggleAddForm()">Cancel</button>
+        <button class="add-btn" onclick="addTask()">Add Task</button>
+      </div>
+    </div>
+
+    <!-- Task List -->
+    <div id="task-container">
+      <div class="loading">
+        <div class="spinner"></div>
+        Loading tasks from Google Sheets…
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SHEET_ID = '17sGkXNtDCTUlOWWd9u8I5ZWH7IPfgOsNwkbMWllKNY4';
+const BUCKET_COLORS = {
+  Admin: '#4A6FA5', House: '#7B5EA7', Family: '#C0392B',
+  Bufala: '#2E86AB', 'Regen Ag': '#3D6B4F', Personal: '#D4882A', Building: '#555555'
+};
+
+let tasks = [];
+let currentBucket = 'All';
+let collapsedSections = new Set();
+
+function bucketColor(b) { return BUCKET_COLORS[b] || '#888'; }
+
+async function loadTasks() {
+  document.getElementById('task-container').innerHTML = `
+    <div class="loading"><div class="spinner"></div>Syncing with Google Sheets…</div>`;
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: `You read a Google Sheets CSV and return the tasks as a JSON array. 
+Return ONLY a JSON array, no markdown, no explanation.
+Each item: {id, title, bucket, type, status, priority, dueDate, notes}`,
+        messages: [{
+          role: "user",
+          content: `Read this Google Sheet and return all tasks as JSON array: https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`,
+        }],
+        tools: [{
+          type: "web_search_20250305",
+          name: "web_search"
+        }],
+        mcp_servers: [{
+          type: "url",
+          url: "https://drivemcp.googleapis.com/mcp/v1",
+          name: "gdrive"
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    tasks = parsed;
+    updateCounts();
+    renderTasks();
+    showToast('Synced ✓');
+  } catch(e) {
+    // Fallback: load from embedded data
+    loadFallback();
+  }
+}
+
+function loadFallback() {
+  // Embedded task data (mirrors the sheet)
+  tasks = [
+    {id:1,title:"Investment decision (RBLX)",bucket:"Admin",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:2,title:"Etrade move to UBS",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:3,title:"Update LinkedIn",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:4,title:"Registration and cop sign-off",bucket:"Admin",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:5,title:"Front license plate",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:6,title:"House and car maintenance log",bucket:"Admin",type:"Project",status:"Open",priority:"",dueDate:"",notes:"Build with AI"},
+    {id:7,title:"Glasses case - call to get it",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:8,title:"Antoine wedding gift",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:9,title:"WaDrew shirt",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:10,title:"Drew hairspray",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:11,title:"Reconnect with Brad Matthews",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:12,title:"Reconnect with Vijay",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:13,title:"Reconnect with Craig Sherman",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:14,title:"Reconnect with Craig Donato",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:15,title:"Reconnect with Hutch",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:16,title:"Network outreach - food/ag list",bucket:"Admin",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:17,title:"Parents trip - plan",bucket:"Admin",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:102,title:"Book Tennessee flights",bucket:"Admin",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:18,title:"Caulking in bathroom",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:19,title:"Air vent in studio - clean and organize",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:20,title:"Water filter",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:21,title:"Clean and reorganize pantry",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:22,title:"Sound protection for X and E's rooms",bucket:"House",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:23,title:"Latch to hold back doors open",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:24,title:"Top door lock closed latch",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:25,title:"Smart electricity meter / PGE setup",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:26,title:"Roof on sauna",bucket:"House",type:"Project",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:27,title:"Pool blanket",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:28,title:"Wipe down outside of house",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:29,title:"Turf under cold plunge",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:30,title:"Bar or rings to hang in backyard",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:31,title:"Mood board for studio",bucket:"House",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:34,title:"Jeep - under dash wires",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:35,title:"Jeep - fix gas gauge",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:36,title:"Jeep - condition or replace soft top",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:40,title:"X baseball camp options and tryouts",bucket:"Family",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:41,title:"George - schedule appt with Dr. Tyler",bucket:"Family",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:42,title:"Kids gut health (E specifically)",bucket:"Family",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:43,title:"Block YouTube and Shorts on kids iPads",bucket:"Family",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:44,title:"E - complete profile and assessment deep dive",bucket:"Family",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:45,title:"Draft parenting principles with Celeste",bucket:"Family",type:"Project",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:46,title:"Tony Robbins parenting framework + infographic",bucket:"Family",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:47,title:"Family debate night - set up format",bucket:"Family",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:48,title:"Movie nights - schedule recurring",bucket:"Family",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:49,title:"Franco order - 32 balls mozz, collect $100",bucket:"Bufala",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:50,title:"Consulting payment transfer",bucket:"Bufala",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:51,title:"Financial model - update and share with Ty",bucket:"Bufala",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:52,title:"LT vision meeting with Ty",bucket:"Bufala",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:53,title:"Update business registration address",bucket:"Bufala",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:54,title:"Check all insurance and permits",bucket:"Bufala",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:55,title:"Ongoing expenses list",bucket:"Bufala",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:57,title:"Taxes - file through TurboTax",bucket:"Bufala",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:64,title:"Fix or redesign Bufala ecommerce",bucket:"Bufala",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:67,title:"RFSI Boot Camp - register online",bucket:"Regen Ag",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:68,title:"RFSI Forum - October Colorado",bucket:"Regen Ag",type:"Task",status:"Open",priority:"",dueDate:"October",notes:""},
+    {id:72,title:"Read - The Dorito Effect",bucket:"Regen Ag",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:73,title:"Read - Sacred Cow",bucket:"Regen Ag",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:74,title:"Read - The Big Fat Surprise",bucket:"Regen Ag",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:77,title:"Course - understandingag.com Regen Ag 101",bucket:"Regen Ag",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:82,title:"Meat box - find regenerative delivery service",bucket:"Regen Ag",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:83,title:"Journal on Roblox and Dave lessons",bucket:"Personal",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:84,title:"Tony Robbins coaching free trial",bucket:"Personal",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:85,title:"Immersive experience - research and commit",bucket:"Personal",type:"Project",status:"Open",priority:"",dueDate:"",notes:"Hoffman etc"},
+    {id:88,title:"Achilles - volunteer at running event",bucket:"Personal",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:89,title:"Banjo - actually practice",bucket:"Personal",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:90,title:"Harmonica - actually practice",bucket:"Personal",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:91,title:"Martial arts - find class and start",bucket:"Personal",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:92,title:"Trips - book something",bucket:"Personal",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
+    {id:93,title:"Parent agent - first working version",bucket:"Building",type:"Project",status:"Open",priority:"Priority",dueDate:"",notes:"Family Unit"},
+    {id:94,title:"Grocery/meal planning app - use and refine",bucket:"Building",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:95,title:"WhisperFlow - set up voice-to-text",bucket:"Building",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:99,title:"Mind map - overall life areas",bucket:"Building",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+    {id:100,title:"Mind map - parenting principles",bucket:"Building",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
+  ];
+  updateCounts();
+  renderTasks();
+}
+
+function updateCounts() {
+  const open = tasks.filter(t => t.status === 'Open');
+  const buckets = ['Admin','House','Family','Bufala','Regen Ag','Personal','Building'];
+  buckets.forEach(b => {
+    const el = document.getElementById('count-' + b);
+    if (el) el.textContent = open.filter(t => t.bucket === b).length;
+  });
+  const allEl = document.getElementById('count-All');
+  if (allEl) allEl.textContent = open.length;
+  const hpEl = document.getElementById('count-High Priority');
+  if (hpEl) hpEl.textContent = open.filter(t => t.priority === "Priority").length;
+
+  document.getElementById('stat-open').textContent = open.length;
+  document.getElementById('stat-high').textContent = open.filter(t => t.priority === 'Priority').length;
+  document.getElementById('stat-done').textContent = tasks.filter(t => t.status === 'Done').length;
+  document.getElementById('stat-projects').textContent = open.filter(t => t.type === 'Project').length;
+}
+
+function getFilteredTasks() {
+  const search = document.getElementById('search').value.toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  const type = document.getElementById('filter-type').value;
+
+  return tasks.filter(t => {
+    if (currentBucket === 'High Priority') { if (t.priority !== "Priority") return false; }
+    else if (currentBucket !== 'All') { if (t.bucket !== currentBucket) return false; }
+    if (status && t.status !== status) return false;
+    if (type && t.type !== type) return false;
+    if (search && !t.title.toLowerCase().includes(search)) return false;
+    return true;
+  });
+}
+
+function renderTasks() {
+  const filtered = getFilteredTasks();
+  const container = document.getElementById('task-container');
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="loading" style="padding:40px">No tasks found.</div>`;
+    return;
+  }
+
+  // Group by bucket if viewing All
+  if (currentBucket === 'All' || currentBucket === 'High Priority') {
+    const groups = {};
+    filtered.forEach(t => {
+      if (!groups[t.bucket]) groups[t.bucket] = [];
+      groups[t.bucket].push(t);
+    });
+    container.innerHTML = Object.entries(groups).map(([bucket, items]) =>
+      renderSection(bucket, items)
+    ).join('');
+  } else {
+    container.innerHTML = renderSection(currentBucket, filtered);
+  }
+}
+
+function renderSection(bucket, items) {
+  const collapsed = collapsedSections.has(bucket);
+  const color = bucketColor(bucket);
+  return `
+    <div class="task-section">
+      <div class="task-section-header" onclick="toggleSection('${bucket}')">
+        <div class="section-bucket-dot" style="background:${color}"></div>
+        <span class="section-title">${bucket}</span>
+        <span style="font-size:11px;color:#8A8778">${items.length} item${items.length !== 1 ? 's' : ''}</span>
+        <span class="section-chevron ${collapsed ? 'collapsed' : ''}">▾</span>
+      </div>
+      ${collapsed ? '' : `
+        <div class="task-list">
+          <div class="task-header">
+            <span></span>
+            <span>Task</span>
+            <span>Type</span>
+            <span>Priority</span>
+            <span>Due</span>
+            <span></span>
+          </div>
+          ${items.map(t => renderTask(t)).join('')}
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function renderTask(t) {
+  const done = t.status === 'Done';
+  return `
+    <div class="task-row ${done ? 'done' : ''}" id="task-${t.id}">
+      <input type="checkbox" class="task-check" ${done ? 'checked' : ''} 
+        onchange="toggleTask(${t.id}, this.checked)">
+      <span class="task-title">${t.title}</span>
+      <span class="task-type">${t.type}</span>
+      <span class="priority-badge ${t.priority === 'Priority' ? '' : 'priority-blank'}">${t.priority === 'Priority' ? '⚑ Priority' : '–'}</span>
+      <span class="task-due">${t.dueDate || ''}</span>
+      <button class="task-delete" onclick="deleteTask(${t.id})" title="Delete">×</button>
+    </div>
+  `;
+}
+
+function toggleSection(bucket) {
+  if (collapsedSections.has(bucket)) collapsedSections.delete(bucket);
+  else collapsedSections.add(bucket);
+  renderTasks();
+}
+
+function selectBucket(bucket, el) {
+  currentBucket = bucket;
+  document.querySelectorAll('.bucket-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('main-title').textContent =
+    bucket === 'All' ? 'All Tasks' :
+    bucket === 'High Priority' ? '⚑ Priority' : bucket;
+  renderTasks();
+}
+
+function toggleTask(id, done) {
+  const task = tasks.find(t => t.id === id);
+  if (task) {
+    task.status = done ? 'Done' : 'Open';
+    updateCounts();
+    renderTasks();
+    showToast(done ? `✓ "${task.title}" marked done` : `Reopened`);
+  }
+}
+
+function deleteTask(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+  if (!confirm(`Delete "${task.title}"?`)) return;
+  tasks = tasks.filter(t => t.id !== id);
+  updateCounts();
+  renderTasks();
+  showToast('Task deleted');
+}
+
+function toggleAddForm() {
+  const form = document.getElementById('add-form');
+  form.classList.toggle('visible');
+  if (form.classList.contains('visible')) {
+    document.getElementById('new-title').focus();
+    // Pre-select current bucket
+    if (currentBucket !== 'All' && currentBucket !== 'High Priority') {
+      document.getElementById('new-bucket').value = currentBucket;
+    }
+  }
+}
+
+function addTask() {
+  const title = document.getElementById('new-title').value.trim();
+  if (!title) return;
+  const newTask = {
+    id: Date.now(),
+    title,
+    bucket: document.getElementById('new-bucket').value,
+    type: document.getElementById('new-type').value,
+    status: 'Open',
+    priority: document.getElementById('new-priority').value,
+    dueDate: document.getElementById('new-due').value,
+    notes: ''
+  };
+  tasks.unshift(newTask);
+  updateCounts();
+  renderTasks();
+  toggleAddForm();
+  document.getElementById('new-title').value = '';
+  showToast(`Added: ${title}`);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Enter key in add form
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('add-form').classList.contains('visible')) {
+    if (document.activeElement !== document.querySelector('.cancel-btn')) addTask();
+  }
+  if (e.key === 'Escape') {
+    const form = document.getElementById('add-form');
+    if (form.classList.contains('visible')) toggleAddForm();
+  }
+});
+
+// Init
+loadFallback();
+</script>
+</body>
+</html>
