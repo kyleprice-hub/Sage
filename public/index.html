@@ -8,27 +8,59 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #F7F5F0; color: #111; min-height: 100vh; }
 
-.app { padding: 16px 12px; max-width: 1100px; margin: 0 auto; }
+.app { padding: 16px 12px; max-width: 1200px; margin: 0 auto; }
 
 /* Header */
 .header { display: flex; align-items: center; margin-bottom: 14px; gap: 10px; flex-wrap: wrap; }
 .header-title { font-size: 18px; font-weight: 500; color: #111; }
 .header-sub { font-size: 11px; color: #aaa; margin-top: 2px; }
-.header-badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-left: auto; }
+.header-right { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-left: auto; }
 .badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; border: 0.5px solid; white-space: nowrap; cursor: default; }
 .badge-overdue { background: #FCEBEB; color: #A32D2D; border-color: #F09595; }
 .badge-soon { background: #FAEEDA; color: #633806; border-color: #FAC775; }
 .badge-done { background: transparent; color: #888; border-color: #ccc; cursor: pointer; }
 .badge-done.active { background: #E1F5EE; color: #0F6E56; border-color: #5DCAA5; }
 
-/* Board */
+/* Tabs */
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; background: #eee; border-radius: 8px; padding: 3px; width: fit-content; }
+.tab { padding: 6px 16px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: #888; transition: all 0.15s; }
+.tab.active { background: #fff; color: #111; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+/* Triage board */
 .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 @media (max-width: 900px) { .board { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .board { grid-template-columns: 1fr; } }
 
-/* Column */
+/* Bucket view */
+.bucket-view { display: flex; flex-direction: column; gap: 12px; }
+.bucket-section { background: #fff; border: 1px solid #E8E4DC; border-radius: 10px; overflow: hidden; }
+.bucket-header { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid #E8E4DC; background: #FAFAF8; cursor: pointer; user-select: none; }
+.bucket-header:hover { background: #F0EDE6; }
+.bucket-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.bucket-name { font-weight: 600; font-size: 13px; flex: 1; }
+.bucket-count { font-size: 11px; color: #8A8778; background: #F7F5F0; padding: 1px 7px; border-radius: 10px; }
+.bucket-chevron { color: #aaa; font-size: 11px; transition: transform 0.2s; }
+.bucket-chevron.collapsed { transform: rotate(-90deg); }
+.bucket-table { width: 100%; }
+.bucket-col-header { display: grid; grid-template-columns: 24px 1fr 90px 80px 32px; gap: 8px; padding: 6px 16px; background: #FAFAF8; border-bottom: 1px solid #E8E4DC; }
+.bucket-col-header span { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #8A8778; }
+.bucket-row { display: grid; grid-template-columns: 24px 1fr 90px 80px 32px; gap: 8px; align-items: center; padding: 8px 16px; border-bottom: 1px solid #E8E4DC; transition: background 0.1s; cursor: grab; }
+.bucket-row:last-child { border-bottom: none; }
+.bucket-row:hover { background: #FAFAF8; }
+.bucket-row.dragging { opacity: 0.35; }
+.bucket-row.drag-over-row { box-shadow: 0 -2px 0 #85B7EB; }
+.b-check { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid #ccc; cursor: pointer; flex-shrink: 0; }
+.b-check:hover { border-color: #5DCAA5; }
+.b-title { font-size: 13px; line-height: 1.4; }
+.b-tier { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 4px; text-align: center; }
+.b-due { font-size: 11px; color: #888; }
+.b-del { background: none; border: none; color: #ccc; cursor: pointer; font-size: 16px; padding: 0 2px; opacity: 0; transition: opacity 0.15s; }
+.bucket-row:hover .b-del { opacity: 0.6; }
+.b-del:hover { opacity: 1 !important; color: #A32D2D; }
+
+/* Column (triage) */
 .column { border-radius: 12px; padding: 12px; min-height: 120px; border: 0.5px solid #e0e0e0; background: #f8f8f8; transition: background 0.15s, border-color 0.15s; }
-.column.drag-over { background: #f0f0f0; }
+.column.drag-over { background: #eef4fb; border-color: #85B7EB; }
 .col-header { display: flex; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 0.5px solid #eee; }
 .col-title { flex: 1; }
 .col-title-main { font-size: 13px; font-weight: 500; color: #111; }
@@ -36,178 +68,362 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
 .col-count { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; border: 0.5px solid; }
 
 /* Card */
-.card { background: #fff; border: 0.5px solid #e0e0e0; border-radius: 8px; padding: 7px 8px; margin-bottom: 4px; cursor: grab; position: relative; transition: opacity 0.15s, box-shadow 0.15s; user-select: none; }
+.card { background: #fff; border: 0.5px solid #e0e0e0; border-radius: 8px; padding: 7px 8px; margin-bottom: 4px; cursor: grab; position: relative; transition: opacity 0.15s; user-select: none; }
 .card:active { cursor: grabbing; }
 .card.dragging { opacity: 0.35; }
 .card.graveyard { opacity: 0.6; }
-.card.drag-target { box-shadow: 0 0 0 2px #85B7EB; }
 .card-body { display: flex; align-items: flex-start; gap: 6px; }
-.card-check { flex-shrink: 0; margin-top: 2px; width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid #ccc; cursor: pointer; background: transparent; display: flex; align-items: center; justify-content: center; }
+.card-check { flex-shrink: 0; margin-top: 2px; width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid #ccc; cursor: pointer; }
 .card-check:hover { border-color: #5DCAA5; }
 .card-content { flex: 1; min-width: 0; }
 .card-text { font-size: 12px; color: #111; line-height: 1.4; }
 .card-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-.card-area { font-size: 10px; color: #888; }
+.card-area { font-size: 10px; font-weight: 500; }
 .card-menu-wrap { position: relative; flex-shrink: 0; }
 .card-menu-btn { background: none; border: none; color: #aaa; cursor: pointer; font-size: 16px; padding: 0 2px; line-height: 1; }
-.card-menu-btn:hover { color: #555; }
 .card-menu { position: absolute; right: 0; top: 100%; z-index: 300; background: #fff; border: 0.5px solid #ccc; border-radius: 8px; padding: 4px 0; min-width: 155px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
 .card-menu-item { padding: 6px 12px; font-size: 12px; cursor: pointer; color: #111; white-space: nowrap; }
 .card-menu-item:hover { background: #f5f5f5; }
-.card-menu-item.green { color: #0F6E56; }
-.card-menu-item.green:hover { background: #E1F5EE; }
-.card-menu-item.red { color: #A32D2D; }
-.card-menu-item.red:hover { background: #FCEBEB; }
+.card-menu-item.green { color: #0F6E56; } .card-menu-item.green:hover { background: #E1F5EE; }
+.card-menu-item.red { color: #A32D2D; } .card-menu-item.red:hover { background: #FCEBEB; }
 .card-menu-divider { border-top: 0.5px solid #eee; margin: 4px 0; }
 
 /* Date badge */
 .date-badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; cursor: pointer; border: 0.5px solid; white-space: nowrap; user-select: none; }
-.date-badge.none { background: transparent; border-color: #B4B2A9; color: #888780; }
-.date-badge.set { background: #E6F1FB; border-color: #85B7EB; color: #0C447C; }
-.date-badge.soon { background: #FAEEDA; border-color: #FAC775; color: #633806; }
-.date-badge.overdue { background: #FCEBEB; border-color: #F09595; color: #A32D2D; }
-.date-popover { position: absolute; z-index: 200; top: calc(100% + 4px); left: 0; background: #fff; border: 0.5px solid #ccc; border-radius: 10px; padding: 10px; min-width: 190px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.date-none  { background: transparent; border-color: #B4B2A9; color: #888780; }
+.date-set   { background: #E6F1FB; border-color: #85B7EB; color: #0C447C; }
+.date-soon  { background: #FAEEDA; border-color: #FAC775; color: #633806; }
+.date-overdue { background: #FCEBEB; border-color: #F09595; color: #A32D2D; }
+.date-popover { position: absolute; z-index: 200; top: calc(100% + 4px); left: 0; background: #fff; border: 0.5px solid #ccc; border-radius: 10px; padding: 10px; min-width: 185px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
 .date-popover input { width: 100%; font-size: 12px; margin-bottom: 8px; border-radius: 6px; border: 0.5px solid #ccc; padding: 4px 6px; }
-.date-popover-btns { display: flex; gap: 6px; }
-.date-popover-btns button { flex: 1; font-size: 11px; padding: 4px 0; border-radius: 6px; cursor: pointer; }
-.date-save-btn { border: 0.5px solid #85B7EB; background: #E6F1FB; color: #0C447C; }
-.date-clear-btn { border: 0.5px solid #F09595; background: transparent; color: #A32D2D; }
+.date-pop-btns { display: flex; gap: 6px; }
+.date-pop-btns button { flex: 1; font-size: 11px; padding: 4px 0; border-radius: 6px; cursor: pointer; }
+.dp-save { border: 0.5px solid #85B7EB; background: #E6F1FB; color: #0C447C; }
+.dp-clear { border: 0.5px solid #F09595; background: transparent; color: #A32D2D; }
 
-/* Add item */
+/* Add */
 .add-btn-row { width: 100%; background: none; border: 0.5px dashed #ddd; border-radius: 8px; padding: 6px 0; font-size: 12px; color: #aaa; cursor: pointer; margin-top: 2px; }
 .add-btn-row:hover { border-color: #aaa; color: #555; }
 .add-form { background: #fff; border: 0.5px solid #ccc; border-radius: 8px; padding: 8px; margin-top: 4px; }
 .add-form input, .add-form select { font-size: 12px; border: 0.5px solid #ddd; border-radius: 6px; padding: 5px 8px; width: 100%; margin-bottom: 6px; font-family: inherit; outline: none; }
 .add-form input:focus, .add-form select:focus { border-color: #85B7EB; }
-.add-form-row { display: flex; gap: 6px; margin-bottom: 6px; }
-.add-form-row select, .add-form-row input { margin-bottom: 0; flex: 1; }
-.add-form-actions { display: flex; gap: 6px; }
-.add-form-actions button { flex: 1; font-size: 11px; padding: 5px 0; border-radius: 6px; cursor: pointer; font-family: inherit; }
-.add-submit { border: 0.5px solid #85B7EB; background: #E6F1FB; color: #0C447C; }
-.add-cancel { border: 0.5px solid #ddd; background: none; color: #888; }
+.af-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.af-row select, .af-row input { margin-bottom: 0; flex: 1; }
+.af-actions { display: flex; gap: 6px; }
+.af-actions button { flex: 1; font-size: 11px; padding: 5px 0; border-radius: 6px; cursor: pointer; font-family: inherit; }
+.af-submit { border: 0.5px solid #85B7EB; background: #E6F1FB; color: #0C447C; }
+.af-cancel { border: 0.5px solid #ddd; background: none; color: #888; }
 
-/* Completed log */
+/* Done log */
 .done-log { background: #f8f8f8; border: 0.5px solid #e0e0e0; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
-.done-log-header { font-size: 13px; font-weight: 500; color: #111; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 0.5px solid #eee; display: flex; align-items: center; gap: 8px; }
+.done-log-hdr { font-size: 13px; font-weight: 500; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 0.5px solid #eee; display: flex; align-items: center; gap: 8px; }
 .done-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-bottom: 0.5px solid #eee; }
 .done-row:last-child { border-bottom: none; }
-.done-check { color: #5DCAA5; font-size: 13px; flex-shrink: 0; }
-.done-text { flex: 1; min-width: 0; font-size: 12px; color: #666; text-decoration: line-through; }
+.done-check { color: #5DCAA5; font-size: 13px; }
+.done-text { flex: 1; font-size: 12px; color: #666; text-decoration: line-through; }
 .done-area { font-size: 10px; color: #aaa; margin-left: 6px; }
-.done-date { font-size: 10px; color: #aaa; white-space: nowrap; flex-shrink: 0; }
-.done-restore { background: none; border: 0.5px solid #ddd; border-radius: 6px; font-size: 10px; padding: 2px 7px; cursor: pointer; color: #888; flex-shrink: 0; }
-.done-restore:hover { border-color: #888; color: #444; }
+.done-date { font-size: 10px; color: #aaa; white-space: nowrap; }
+.done-restore { background: none; border: 0.5px solid #ddd; border-radius: 6px; font-size: 10px; padding: 2px 7px; cursor: pointer; color: #888; }
+.done-restore:hover { border-color: #888; }
+
+/* Tier badge colors for bucket view */
+.tier-t1 { background: #FCEBEB; color: #A32D2D; }
+.tier-t2 { background: #FAEEDA; color: #633806; }
+.tier-t3 { background: #E6F1FB; color: #0C447C; }
+.tier-gy { background: #F1EFE8; color: #444441; }
 </style>
 </head>
 <body>
-<div class="app" id="app">
-  <div style="padding:40px;text-align:center;color:#aaa;font-size:13px;">Loading…</div>
-</div>
+<div class="app" id="app"></div>
 
 <script>
-const SHEET_ID = '1AvsNbN7TmxlOqbuHxUIPM1c8ONSzdGxmKRFO_uGZNKg';
-const STORAGE_KEY = 'sage-triage-v2';
 const TIERS = [
-  { id:'t1', label:'On the clock',       sub:'Deadlines & consequences', color:'#A32D2D', bg:'#FCEBEB', border:'#F09595' },
-  { id:'t2', label:'Active backlog',     sub:'No fire, real value',      color:'#633806', bg:'#FAEEDA', border:'#FAC775' },
-  { id:'t3', label:'Important + patient',sub:'Goals live here',          color:'#0C447C', bg:'#E6F1FB', border:'#85B7EB' },
-  { id:'gy', label:'Graveyard',          sub:'Honored but released',     color:'#444441', bg:'#F1EFE8', border:'#B4B2A9' },
+  {id:'t1',label:'On the clock',      sub:'Deadlines & consequences', color:'#A32D2D',bg:'#FCEBEB',border:'#F09595'},
+  {id:'t2',label:'Active backlog',    sub:'No fire, real value',      color:'#633806',bg:'#FAEEDA',border:'#FAC775'},
+  {id:'t3',label:'Important+patient', sub:'Goals live here',          color:'#0C447C',bg:'#E6F1FB',border:'#85B7EB'},
+  {id:'gy',label:'Graveyard',         sub:'Honored but released',     color:'#444441',bg:'#F1EFE8',border:'#B4B2A9'},
 ];
-const BUCKET_COLORS = {
-  Admin:'#4A6FA5', House:'#7B5EA7', Family:'#C0392B',
-  Bufala:'#2E86AB', 'Regen Ag':'#3D6B4F', Personal:'#D4882A', Building:'#555555'
-};
+const TIER_LABELS = {t1:'On the clock',t2:'Active backlog',t3:'Important+patient',gy:'Graveyard'};
+const BUCKET_COLORS = {Admin:'#4A6FA5',House:'#7B5EA7',Family:'#C0392B',Bufala:'#2E86AB','Regen Ag':'#3D6B4F',Personal:'#D4882A',Building:'#555555'};
 const AREAS = ['Admin','Family','House','Bufala','Building','Regen Ag','Personal'];
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const STORAGE_KEY = 'sage-v3';
+
+// ── Seed data (mirrors Google Sheet) ─────────────────────────
+const SEED = [
+  {id:1,text:"Investment decision (RBLX)",area:"Admin",tier:"t1",date:null,done:false},
+  {id:4,text:"Registration and cop sign-off",area:"Admin",tier:"t1",date:null,done:false},
+  {id:102,text:"Book Tennessee flights",area:"Admin",tier:"t1",date:null,done:false},
+  {id:26,text:"Roof on sauna",area:"House",tier:"t1",date:null,done:false},
+  {id:40,text:"X baseball camp options and tryouts",area:"Family",tier:"t1",date:null,done:false},
+  {id:41,text:"George - schedule appt with Dr. Tyler",area:"Family",tier:"t1",date:null,done:false},
+  {id:43,text:"Block YouTube and Shorts on kids iPads",area:"Family",tier:"t1",date:null,done:false},
+  {id:45,text:"Draft parenting principles with Celeste",area:"Family",tier:"t1",date:null,done:false},
+  {id:49,text:"Franco order - 32 balls mozz, collect $100",area:"Bufala",tier:"t1",date:null,done:false},
+  {id:50,text:"Consulting payment transfer",area:"Bufala",tier:"t1",date:null,done:false},
+  {id:51,text:"Financial model - update and share with Ty",area:"Bufala",tier:"t1",date:null,done:false},
+  {id:57,text:"Taxes - file through TurboTax",area:"Bufala",tier:"t1",date:null,done:false},
+  {id:67,text:"RFSI Boot Camp - register online",area:"Regen Ag",tier:"t1",date:null,done:false},
+  {id:91,text:"Martial arts - find class and start",area:"Personal",tier:"t1",date:null,done:false},
+  {id:92,text:"Trips - book something",area:"Personal",tier:"t1",date:null,done:false},
+  {id:93,text:"Parent agent - first working version",area:"Building",tier:"t1",date:null,done:false},
+  {id:2,text:"Etrade move to UBS",area:"Admin",tier:"t2",date:null,done:false},
+  {id:3,text:"Update LinkedIn",area:"Admin",tier:"t2",date:null,done:false},
+  {id:5,text:"Front license plate",area:"Admin",tier:"t2",date:null,done:false},
+  {id:8,text:"Antoine wedding gift",area:"Admin",tier:"t2",date:null,done:false},
+  {id:11,text:"Reconnect with Brad Matthews",area:"Admin",tier:"t2",date:null,done:false},
+  {id:12,text:"Reconnect with Vijay",area:"Admin",tier:"t2",date:null,done:false},
+  {id:13,text:"Reconnect with Craig Sherman",area:"Admin",tier:"t2",date:null,done:false},
+  {id:14,text:"Reconnect with Craig Donato",area:"Admin",tier:"t2",date:null,done:false},
+  {id:15,text:"Reconnect with Hutch",area:"Admin",tier:"t2",date:null,done:false},
+  {id:16,text:"Network outreach - food/ag list",area:"Admin",tier:"t2",date:null,done:false},
+  {id:18,text:"Caulking in bathroom",area:"House",tier:"t2",date:null,done:false},
+  {id:19,text:"Air vent in studio - clean and organize",area:"House",tier:"t2",date:null,done:false},
+  {id:20,text:"Water filter",area:"House",tier:"t2",date:null,done:false},
+  {id:21,text:"Clean and reorganize pantry",area:"House",tier:"t2",date:null,done:false},
+  {id:27,text:"Pool blanket",area:"House",tier:"t2",date:null,done:false},
+  {id:29,text:"Turf under cold plunge",area:"House",tier:"t2",date:null,done:false},
+  {id:30,text:"Bar or rings to hang in backyard",area:"House",tier:"t2",date:null,done:false},
+  {id:34,text:"Jeep - under dash wires",area:"House",tier:"t2",date:null,done:false},
+  {id:35,text:"Jeep - fix gas gauge",area:"House",tier:"t2",date:null,done:false},
+  {id:36,text:"Jeep - condition or replace soft top",area:"House",tier:"t2",date:null,done:false},
+  {id:42,text:"Kids gut health (E specifically)",area:"Family",tier:"t2",date:null,done:false},
+  {id:52,text:"LT vision meeting with Ty",area:"Bufala",tier:"t2",date:null,done:false},
+  {id:53,text:"Update business registration address",area:"Bufala",tier:"t2",date:null,done:false},
+  {id:54,text:"Check all insurance and permits",area:"Bufala",tier:"t2",date:null,done:false},
+  {id:55,text:"Ongoing expenses list",area:"Bufala",tier:"t2",date:null,done:false},
+  {id:64,text:"Fix or redesign Bufala ecommerce",area:"Bufala",tier:"t2",date:null,done:false},
+  {id:65,text:"Dairy/creamery contact - San Mateo county",area:"Bufala",tier:"t2",date:null,done:false},
+  {id:68,text:"RFSI Forum - October Colorado",area:"Regen Ag",tier:"t2",date:"2026-10-01",done:false},
+  {id:82,text:"Meat box - find regenerative delivery service",area:"Regen Ag",tier:"t2",date:null,done:false},
+  {id:83,text:"Journal on Roblox and Dave lessons",area:"Personal",tier:"t2",date:null,done:false},
+  {id:87,text:"Rebecca - book facial/microneedling",area:"Personal",tier:"t2",date:null,done:false},
+  {id:94,text:"Grocery/meal planning app - refine",area:"Building",tier:"t2",date:null,done:false},
+  {id:95,text:"WhisperFlow - set up voice-to-text",area:"Building",tier:"t2",date:null,done:false},
+  {id:6,text:"House and car maintenance log",area:"Admin",tier:"t3",date:null,done:false},
+  {id:17,text:"Parents trip - plan",area:"Admin",tier:"t3",date:null,done:true,completedAt:"2026-06-09T00:00:00.000Z"},
+  {id:22,text:"Sound protection for X and E's rooms",area:"House",tier:"t3",date:null,done:false},
+  {id:44,text:"E - complete profile and assessment deep dive",area:"Family",tier:"t3",date:null,done:false},
+  {id:46,text:"Tony Robbins parenting framework + infographic",area:"Family",tier:"t3",date:null,done:false},
+  {id:47,text:"Family debate night - set up format",area:"Family",tier:"t3",date:null,done:false},
+  {id:48,text:"Movie nights - schedule recurring",area:"Family",tier:"t3",date:null,done:false},
+  {id:58,text:"Order management / inventory log",area:"Bufala",tier:"t3",date:null,done:false},
+  {id:59,text:"Batch production spreadsheet",area:"Bufala",tier:"t3",date:null,done:false},
+  {id:60,text:"Social media - water buffalo vs bison concept",area:"Bufala",tier:"t3",date:null,done:false},
+  {id:61,text:"Social media agent - AI-assisted content",area:"Bufala",tier:"t3",date:null,done:false},
+  {id:69,text:"Join groups in regen ag space",area:"Regen Ag",tier:"t3",date:null,done:false},
+  {id:70,text:"Explore regen ag investment syndicate",area:"Regen Ag",tier:"t3",date:null,done:false},
+  {id:71,text:"Regen ag class at Mt Carmel",area:"Regen Ag",tier:"t3",date:null,done:false},
+  {id:72,text:"Read - The Dorito Effect",area:"Regen Ag",tier:"t3",date:null,done:false},
+  {id:73,text:"Read - Sacred Cow",area:"Regen Ag",tier:"t3",date:null,done:false},
+  {id:74,text:"Read - The Big Fat Surprise",area:"Regen Ag",tier:"t3",date:null,done:false},
+  {id:75,text:"Read - Grass Productivity by Voisin",area:"Regen Ag",tier:"t3",date:null,done:false},
+  {id:76,text:"Listen - Food Fix Uncensored podcast",area:"Regen Ag",tier:"t3",date:null,done:false},
+  {id:77,text:"Course - understandingag.com Regen Ag 101",area:"Regen Ag",tier:"t3",date:null,done:false},
+  {id:79,text:"AI prompt - map food/ag advocacy businesses",area:"Regen Ag",tier:"t3",date:null,done:false},
+  {id:80,text:"Mind map - regen ag landscape + ideas",area:"Regen Ag",tier:"t3",date:null,done:false},
+  {id:85,text:"Immersive experience - research and commit",area:"Personal",tier:"t3",date:null,done:false},
+  {id:86,text:"Fermentation - research and run first experiment",area:"Personal",tier:"t3",date:null,done:false},
+  {id:88,text:"Achilles - volunteer at running event",area:"Personal",tier:"t3",date:null,done:false},
+  {id:89,text:"Banjo - actually practice",area:"Personal",tier:"t3",date:null,done:false},
+  {id:90,text:"Harmonica - actually practice",area:"Personal",tier:"t3",date:null,done:false},
+  {id:96,text:"Explore OpenClaw / GenSpark",area:"Building",tier:"t3",date:null,done:false},
+  {id:97,text:"Sauna and workout booking app",area:"Building",tier:"t3",date:null,done:false},
+  {id:99,text:"Mind map - overall life areas",area:"Building",tier:"t3",date:null,done:false},
+  {id:100,text:"Mind map - parenting principles",area:"Building",tier:"t3",date:null,done:false},
+  {id:7,text:"Glasses case - call to get it",area:"Admin",tier:"gy",date:null,done:false},
+  {id:9,text:"WaDrew shirt",area:"Admin",tier:"gy",date:null,done:false},
+  {id:10,text:"Drew hairspray",area:"Admin",tier:"gy",date:null,done:false},
+  {id:23,text:"Latch to hold back doors open",area:"House",tier:"gy",date:null,done:false},
+  {id:24,text:"Top door lock closed latch",area:"House",tier:"gy",date:null,done:false},
+  {id:25,text:"Smart electricity meter / PGE setup",area:"House",tier:"gy",date:null,done:false},
+  {id:28,text:"Wipe down outside of house",area:"House",tier:"gy",date:null,done:false},
+  {id:31,text:"Mood board for studio",area:"House",tier:"gy",date:null,done:false},
+  {id:32,text:"Jeep - new wheels",area:"House",tier:"gy",date:null,done:false},
+  {id:33,text:"Jeep - new front bumper",area:"House",tier:"gy",date:null,done:false},
+  {id:37,text:"Jeep - change rear seat belts",area:"House",tier:"gy",date:null,done:false},
+  {id:38,text:"Jeep - get drill/adapter front window",area:"House",tier:"gy",date:null,done:false},
+  {id:39,text:"Jeep - attach rear door fold-down cables",area:"House",tier:"gy",date:null,done:false},
+  {id:62,text:"Merch - new designs and print-on-demand",area:"Bufala",tier:"gy",date:null,done:false},
+  {id:63,text:"Logo tattoos - finalize design",area:"Bufala",tier:"gy",date:null,done:false},
+  {id:66,text:"Phoebe Lane / One Acre Fund - follow up",area:"Bufala",tier:"gy",date:null,done:false},
+  {id:78,text:"Research - Nutrition Coalition / Nina Teicholz",area:"Regen Ag",tier:"gy",date:null,done:false},
+  {id:81,text:"Research - Sacred Cow GASL follow-up",area:"Regen Ag",tier:"gy",date:null,done:false},
+  {id:84,text:"Tony Robbins coaching free trial",area:"Personal",tier:"gy",date:null,done:false},
+  {id:98,text:"Meal planning app analysis vs competitors",area:"Building",tier:"gy",date:null,done:false},
+  {id:101,text:"Studio wall - print and mount visuals",area:"Building",tier:"gy",date:null,done:false},
+];
 
 let items = [];
+let currentTab = 'triage'; // 'triage' | 'buckets'
+let collapsedBuckets = new Set();
+let showDone = false;
 let dragId = null;
 let dragOverTier = null;
-let dragOverId = null; // for within-column ordering
+let dragOverId = null;
 let openMenuId = null;
 let openDateId = null;
-let showDone = false;
+let saveTimer = null;
 
-// ── Storage ──────────────────────────────────────────────────
-function saveLocal() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch {}
+// ── Persistence ───────────────────────────────────────────────
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch {}
+  }, 400);
 }
-function loadLocal() {
+function load() {
   try { const d = localStorage.getItem(STORAGE_KEY); if (d) return JSON.parse(d); } catch {}
   return null;
 }
 
-// ── Date utils ───────────────────────────────────────────────
-function parseDate(s) {
-  if (!s) return null;
-  const d = new Date(s + 'T00:00:00');
-  return isNaN(d) ? null : d;
-}
-function fmtDate(s) {
-  const d = parseDate(s);
-  if (!d) return null;
-  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
-}
-function dateStatus(s) {
-  const d = parseDate(s);
-  if (!d) return 'none';
-  const diff = (d - TODAY) / 86400000;
-  if (diff < 0) return 'overdue';
-  if (diff <= 7) return 'soon';
-  return 'set';
-}
-function fmtCompletedDate(s) {
-  if (!s) return '';
-  return new Date(s).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-}
-function nextId() { return Math.max(0, ...items.map(i => i.id)) + 1; }
+// ── Date utils ────────────────────────────────────────────────
+function parseDate(s) { if (!s) return null; const d = new Date(s+'T00:00:00'); return isNaN(d)?null:d; }
+function fmtDate(s) { const d=parseDate(s); if(!d)return null; return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+function dateStatus(s) { const d=parseDate(s); if(!d)return'none'; const diff=(d-TODAY)/86400000; if(diff<0)return'overdue'; if(diff<=7)return'soon'; return'set'; }
+function fmtCompleted(s) { if(!s)return''; return new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function nextId() { return Math.max(0,...items.map(i=>i.id))+1; }
 
-// ── Bucket tag ───────────────────────────────────────────────
-function bucketTag(area) {
-  const c = BUCKET_COLORS[area] || '#888';
-  return `<span style="font-size:10px;color:${c};font-weight:500;">${area}</span>`;
-}
+// ── Helpers ───────────────────────────────────────────────────
+function bucketColor(area) { return BUCKET_COLORS[area]||'#888'; }
 
-// ── Date badge ───────────────────────────────────────────────
-function dateBadgeHtml(item) {
-  if (item.tier === 'gy') return '';
+function dateBadgeHtml(item, inline) {
+  if (item.tier==='gy') return '';
   const st = dateStatus(item.date);
-  const label = fmtDate(item.date) || '+ date';
-  return `<span class="date-badge ${st}" onclick="toggleDate(event,${item.id})">${label}</span>`;
+  const label = fmtDate(item.date)||'+ date';
+  const pop = inline ? '' : `
+    <div class="date-popover" id="datepop-${item.id}" style="display:none">
+      <input type="date" id="dateinput-${item.id}" value="${item.date||''}" />
+      <div class="date-pop-btns">
+        <button class="dp-save" onclick="saveDate(${item.id})">Save</button>
+        <button class="dp-clear" onclick="clearDate(${item.id})">Clear</button>
+      </div>
+    </div>`;
+  return `<div style="position:relative;display:inline-block">
+    <span class="date-badge date-${st}" onclick="toggleDate(event,${item.id})">${label}</span>
+    ${pop}
+  </div>`;
 }
 
-// ── Card ─────────────────────────────────────────────────────
+// ── Actions ───────────────────────────────────────────────────
+function completeItem(id) { items=items.map(i=>i.id===id?{...i,done:true,completedAt:new Date().toISOString()}:i); closeAll();save();render(); }
+function restoreItem(id) { items=items.map(i=>i.id===id?{...i,done:false,completedAt:null}:i); save();render(); }
+function deleteItem(id) { items=items.filter(i=>i.id!==id); closeAll();save();render(); }
+function moveItem(id,tier) { items=items.map(i=>i.id===id?{...i,tier}:i); closeAll();save();render(); }
+function toggleDone() { showDone=!showDone; render(); }
+function switchTab(tab) { currentTab=tab; render(); }
+function toggleBucket(b) { if(collapsedBuckets.has(b))collapsedBuckets.delete(b);else collapsedBuckets.add(b); render(); }
+
+function saveDate(id) { const v=document.getElementById('dateinput-'+id)?.value||null; items=items.map(i=>i.id===id?{...i,date:v||null}:i); closeAll();save();render(); }
+function clearDate(id) { items=items.map(i=>i.id===id?{...i,date:null}:i); closeAll();save();render(); }
+
+function toggleDate(e,id) {
+  e.stopPropagation();
+  const pop=document.getElementById('datepop-'+id); if(!pop)return;
+  const wasOpen=openDateId===id; closeAll();
+  if(!wasOpen){pop.style.display='block';openDateId=id;}
+}
+function toggleMenu(e,id) {
+  e.stopPropagation();
+  const menu=document.getElementById('menu-'+id); if(!menu)return;
+  const wasOpen=openMenuId===id; closeAll();
+  if(!wasOpen){menu.style.display='block';openMenuId=id;}
+}
+function closeAll() {
+  if(openMenuId){const m=document.getElementById('menu-'+openMenuId);if(m)m.style.display='none';openMenuId=null;}
+  if(openDateId){const d=document.getElementById('datepop-'+openDateId);if(d)d.style.display='none';openDateId=null;}
+}
+document.addEventListener('click', closeAll);
+
+// ── Add forms ─────────────────────────────────────────────────
+function openAddForm(tierId) {
+  const wrap=document.getElementById('af-wrap-'+tierId);
+  const btn=document.getElementById('af-btn-'+tierId);
+  if(!wrap)return;
+  const areaOpts=AREAS.map(a=>`<option>${a}</option>`).join('');
+  wrap.innerHTML=`<div class="add-form">
+    <input id="aft-${tierId}" placeholder="What needs doing…" onkeydown="afKey(event,'${tierId}')" />
+    <div class="af-row">
+      <select id="afa-${tierId}">${areaOpts}</select>
+      ${tierId!=='gy'?`<input type="date" id="afd-${tierId}" />`:''}
+    </div>
+    <div class="af-actions">
+      <button class="af-submit" onclick="submitAdd('${tierId}')">Add</button>
+      <button class="af-cancel" onclick="closeAddForm('${tierId}')">Cancel</button>
+    </div>
+  </div>`;
+  if(btn)btn.style.display='none';
+  setTimeout(()=>document.getElementById('aft-'+tierId)?.focus(),0);
+}
+function closeAddForm(tierId) {
+  const wrap=document.getElementById('af-wrap-'+tierId);
+  const btn=document.getElementById('af-btn-'+tierId);
+  if(wrap)wrap.innerHTML=''; if(btn)btn.style.display='';
+}
+function afKey(e,tierId) { if(e.key==='Enter')submitAdd(tierId); if(e.key==='Escape')closeAddForm(tierId); }
+function submitAdd(tierId) {
+  const text=document.getElementById('aft-'+tierId)?.value.trim(); if(!text)return;
+  const area=document.getElementById('afa-'+tierId)?.value||'Admin';
+  const date=document.getElementById('afd-'+tierId)?.value||null;
+  items.push({id:nextId(),text,area,tier:tierId,date,done:false});
+  save();render();
+}
+
+// ── Drag & Drop ───────────────────────────────────────────────
+function onDragStart(e,id) { dragId=id; e.dataTransfer.effectAllowed='move'; setTimeout(render,0); }
+function onDragEnd() { dragId=null;dragOverTier=null;dragOverId=null; render(); }
+function onColDragOver(e,tierId) { e.preventDefault(); if(dragOverTier!==tierId){dragOverTier=tierId;render();} }
+function onCardDragOver(e,cardId) { e.preventDefault();e.stopPropagation(); dragOverId=cardId; }
+function onDrop(tierId) {
+  if(dragId==null)return;
+  if(dragOverId && dragOverId!==dragId) {
+    const target=items.find(i=>i.id===dragOverId);
+    if(target){
+      const newItems=items.filter(i=>i.id!==dragId);
+      const dragged={...items.find(i=>i.id===dragId),tier:target.tier};
+      const idx=newItems.findIndex(i=>i.id===dragOverId);
+      newItems.splice(idx,0,dragged);
+      items=newItems;
+    }
+  } else {
+    items=items.map(i=>i.id===dragId?{...i,tier:tierId}:i);
+  }
+  dragId=null;dragOverTier=null;dragOverId=null;
+  save();render();
+}
+function onRowDragOver(e,rowId) { e.preventDefault();e.stopPropagation(); dragOverId=rowId; }
+function onRowDrop(e,tierId) {
+  if(dragId==null)return;
+  if(dragOverId && dragOverId!==dragId){
+    const target=items.find(i=>i.id===dragOverId);
+    if(target){
+      const newItems=items.filter(i=>i.id!==dragId);
+      const dragged={...items.find(i=>i.id===dragId),tier:target.tier,area:target.area};
+      const idx=newItems.findIndex(i=>i.id===dragOverId);
+      newItems.splice(idx,0,dragged);
+      items=newItems;
+    }
+  } else {
+    items=items.map(i=>i.id===dragId?{...i,tier:tierId}:i);
+  }
+  dragId=null;dragOverTier=null;dragOverId=null;
+  save();render();
+}
+
+// ── Triage view ───────────────────────────────────────────────
 function cardHtml(item) {
-  const isDragging = dragId === item.id;
-  const isGy = item.tier === 'gy';
-  const otherTiers = TIERS.filter(t => t.id !== item.tier);
-  const moveItems = otherTiers.map(t =>
-    `<div class="card-menu-item" onclick="moveItem(${item.id},'${t.id}')">&rarr; ${t.label}</div>`
-  ).join('');
-  return `
-  <div class="card${isDragging?' dragging':''}${isGy?' graveyard':''}"
-    id="card-${item.id}"
-    draggable="true"
-    ondragstart="onDragStart(event,${item.id})"
-    ondragend="onDragEnd()"
-    ondragover="onCardDragOver(event,${item.id})"
-  >
+  const otherTiers=TIERS.filter(t=>t.id!==item.tier);
+  return `<div class="card${dragId===item.id?' dragging':''}${item.tier==='gy'?' graveyard':''}"
+    id="card-${item.id}" draggable="true"
+    ondragstart="onDragStart(event,${item.id})" ondragend="onDragEnd()"
+    ondragover="onCardDragOver(event,${item.id})">
     <div class="card-body">
       <div class="card-check" onclick="completeItem(${item.id})"></div>
       <div class="card-content">
         <div class="card-text">${item.text}</div>
         <div class="card-meta">
-          ${bucketTag(item.area)}
-          <div style="position:relative;display:inline-block">
-            ${dateBadgeHtml(item)}
-            <div class="date-popover" id="datepop-${item.id}" style="display:none">
-              <input type="date" id="dateinput-${item.id}" value="${item.date||''}" />
-              <div class="date-popover-btns">
-                <button class="date-save-btn" onclick="saveDate(${item.id})">Save</button>
-                <button class="date-clear-btn" onclick="clearDate(${item.id})">Clear</button>
-              </div>
-            </div>
-          </div>
+          <span class="card-area" style="color:${bucketColor(item.area)}">${item.area}</span>
+          ${dateBadgeHtml(item,false)}
         </div>
       </div>
       <div class="card-menu-wrap">
@@ -215,7 +431,7 @@ function cardHtml(item) {
         <div class="card-menu" id="menu-${item.id}" style="display:none">
           <div class="card-menu-item green" onclick="completeItem(${item.id})">✓ Mark complete</div>
           <div class="card-menu-divider"></div>
-          ${moveItems}
+          ${otherTiers.map(t=>`<div class="card-menu-item" onclick="moveItem(${item.id},'${t.id}')">→ ${t.label}</div>`).join('')}
           <div class="card-menu-divider"></div>
           <div class="card-menu-item red" onclick="deleteItem(${item.id})">Delete</div>
         </div>
@@ -224,38 +440,11 @@ function cardHtml(item) {
   </div>`;
 }
 
-// ── Add form ─────────────────────────────────────────────────
-function addFormHtml(tierId) {
-  const areaOpts = AREAS.map(a => `<option>${a}</option>`).join('');
-  return `
-  <div class="add-form" id="addform-${tierId}">
-    <input id="addtext-${tierId}" placeholder="What needs doing…" onkeydown="addFormKey(event,'${tierId}')" />
-    <div class="add-form-row">
-      <select id="addarea-${tierId}">${areaOpts}</select>
-      ${tierId !== 'gy' ? `<input type="date" id="adddate-${tierId}" />` : ''}
-    </div>
-    <div class="add-form-actions">
-      <button class="add-submit" onclick="submitAdd('${tierId}')">Add</button>
-      <button class="add-cancel" onclick="closeAddForm('${tierId}')">Cancel</button>
-    </div>
-  </div>`;
-}
-
-// ── Column ───────────────────────────────────────────────────
-function columnHtml(tier) {
-  const mine = items.filter(i => i.tier === tier.id && !i.done);
-  if (tier.id === 't1') {
-    mine.sort((a,b) => {
-      if (a.date && b.date) return new Date(a.date) - new Date(b.date);
-      if (a.date) return -1; if (b.date) return 1; return 0;
-    });
-  }
-  const isOver = dragOverTier === tier.id;
-  const cards = mine.map(cardHtml).join('');
-  return `
-  <div class="column${isOver?' drag-over':''}" id="col-${tier.id}"
-    ondragover="onColDragOver(event,'${tier.id}')"
-    ondrop="onDrop('${tier.id}')">
+function colHtml(tier) {
+  const mine=items.filter(i=>i.tier===tier.id&&!i.done);
+  if(tier.id==='t1') mine.sort((a,b)=>{if(a.date&&b.date)return new Date(a.date)-new Date(b.date);if(a.date)return-1;if(b.date)return 1;return 0;});
+  return `<div class="column${dragOverTier===tier.id?' drag-over':''}" id="col-${tier.id}"
+    ondragover="onColDragOver(event,'${tier.id}')" ondrop="onDrop('${tier.id}')">
     <div class="col-header">
       <div class="col-title">
         <div class="col-title-main">${tier.label}</div>
@@ -263,236 +452,133 @@ function columnHtml(tier) {
       </div>
       <span class="col-count" style="background:${tier.bg};color:${tier.color};border-color:${tier.border}">${mine.length}</span>
     </div>
-    ${cards}
-    <button class="add-btn-row" id="addbtn-${tier.id}" onclick="openAddForm('${tier.id}')">+ add item</button>
-    <div id="addform-wrap-${tier.id}"></div>
+    ${mine.map(cardHtml).join('')}
+    <button class="add-btn-row" id="af-btn-${tier.id}" onclick="openAddForm('${tier.id}')">+ add item</button>
+    <div id="af-wrap-${tier.id}"></div>
   </div>`;
 }
 
-// ── Done log ─────────────────────────────────────────────────
-function doneLogHtml() {
-  const done = items.filter(i => i.done).sort((a,b) => new Date(b.completedAt||0) - new Date(a.completedAt||0));
-  if (!showDone || !done.length) return '';
-  const rows = done.map(item => `
-    <div class="done-row">
-      <span class="done-check">✓</span>
-      <div class="done-text">${item.text}<span class="done-area">${item.area}</span></div>
-      <span class="done-date">${fmtCompletedDate(item.completedAt)}</span>
-      <button class="done-restore" onclick="restoreItem(${item.id})">restore</button>
-    </div>`).join('');
-  return `
-  <div class="done-log">
-    <div class="done-log-header">
-      Completed
-      <span class="badge badge-done active">${done.length}</span>
+// ── Bucket view ───────────────────────────────────────────────
+function bucketRowHtml(item) {
+  const tier=TIERS.find(t=>t.id===item.tier);
+  const st=dateStatus(item.date);
+  const dateLbl=fmtDate(item.date)||'';
+  return `<div class="bucket-row${dragId===item.id?' dragging':''}"
+    draggable="true"
+    ondragstart="onDragStart(event,${item.id})" ondragend="onDragEnd()"
+    ondragover="onRowDragOver(event,${item.id})" ondrop="onRowDrop(event,'${item.tier}')">
+    <div class="b-check" onclick="completeItem(${item.id})"></div>
+    <div class="b-title">${item.text}</div>
+    <span class="b-tier tier-${item.tier}">${tier?tier.label:item.tier}</span>
+    <span class="b-due date-badge date-${st||'none'}" onclick="toggleDate(event,${item.id})" style="cursor:pointer">
+      ${dateLbl||'+ date'}
+      <div class="date-popover" id="datepop-${item.id}" style="display:none;position:absolute;z-index:200">
+        <input type="date" id="dateinput-${item.id}" value="${item.date||''}" />
+        <div class="date-pop-btns">
+          <button class="dp-save" onclick="saveDate(${item.id})">Save</button>
+          <button class="dp-clear" onclick="clearDate(${item.id})">Clear</button>
+        </div>
+      </div>
+    </span>
+    <button class="b-del" onclick="deleteItem(${item.id})">×</button>
+  </div>`;
+}
+
+function bucketSectionHtml(area) {
+  const mine=items.filter(i=>i.area===area&&!i.done);
+  const collapsed=collapsedBuckets.has(area);
+  const color=bucketColor(area);
+  return `<div class="bucket-section"
+    ondragover="onColDragOver(event,'${area}')" ondrop="onBucketDrop(event,'${area}')">
+    <div class="bucket-header" onclick="toggleBucket('${area}')">
+      <div class="bucket-dot" style="background:${color}"></div>
+      <span class="bucket-name">${area}</span>
+      <span class="bucket-count">${mine.length}</span>
+      <span class="bucket-chevron${collapsed?' collapsed':''}">▾</span>
     </div>
-    ${rows}
+    ${collapsed?'': `
+    <div class="bucket-col-header">
+      <span></span><span>Task</span><span>Category</span><span>Due</span><span></span>
+    </div>
+    ${mine.map(bucketRowHtml).join('')}
+    `}
   </div>`;
 }
 
-// ── Header ───────────────────────────────────────────────────
+function onBucketDrop(e,area) {
+  if(dragId==null)return;
+  if(dragOverId&&dragOverId!==dragId){
+    const target=items.find(i=>i.id===dragOverId);
+    if(target){
+      const newItems=items.filter(i=>i.id!==dragId);
+      const dragged={...items.find(i=>i.id===dragId),area:target.area,tier:target.tier};
+      const idx=newItems.findIndex(i=>i.id===dragOverId);
+      newItems.splice(idx,0,dragged);
+      items=newItems;
+    }
+  } else {
+    // Just change bucket area, keep tier
+    items=items.map(i=>i.id===dragId?{...i,area}:i);
+  }
+  dragId=null;dragOverTier=null;dragOverId=null;
+  save();render();
+}
+
+// ── Done log ──────────────────────────────────────────────────
+function doneLogHtml() {
+  if(!showDone)return'';
+  const done=items.filter(i=>i.done).sort((a,b)=>new Date(b.completedAt||0)-new Date(a.completedAt||0));
+  if(!done.length)return'';
+  return `<div class="done-log">
+    <div class="done-log-hdr">Completed <span class="badge badge-done active">${done.length}</span></div>
+    ${done.map(i=>`<div class="done-row">
+      <span class="done-check">✓</span>
+      <div class="done-text">${i.text}<span class="done-area">${i.area}</span></div>
+      <span class="done-date">${fmtCompleted(i.completedAt)}</span>
+      <button class="done-restore" onclick="restoreItem(${i.id})">restore</button>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ── Header ────────────────────────────────────────────────────
 function headerHtml() {
-  const overdue = items.filter(i => !i.done && i.tier !== 'gy' && dateStatus(i.date) === 'overdue');
-  const soon = items.filter(i => !i.done && i.tier !== 'gy' && dateStatus(i.date) === 'soon');
-  const done = items.filter(i => i.done);
-  return `
-  <div class="header">
+  const overdue=items.filter(i=>!i.done&&i.tier!=='gy'&&dateStatus(i.date)==='overdue');
+  const soon=items.filter(i=>!i.done&&i.tier!=='gy'&&dateStatus(i.date)==='soon');
+  const done=items.filter(i=>i.done);
+  return `<div class="header">
     <div>
       <div class="header-title">Kyle's board</div>
-      <div class="header-sub" id="save-status">All changes saved</div>
+      <div class="header-sub">All changes saved</div>
     </div>
-    <div class="header-badges">
-      ${overdue.length ? `<span class="badge badge-overdue">${overdue.length} overdue</span>` : ''}
-      ${soon.length ? `<span class="badge badge-soon">${soon.length} due soon</span>` : ''}
-      ${done.length ? `<span class="badge badge-done${showDone?' active':''}" onclick="toggleDone()">${showDone?'hide':'show'} ${done.length} completed</span>` : ''}
+    <div class="header-right">
+      ${overdue.length?`<span class="badge badge-overdue">${overdue.length} overdue</span>`:''}
+      ${soon.length?`<span class="badge badge-soon">${soon.length} due soon</span>`:''}
+      ${done.length?`<span class="badge badge-done${showDone?' active':''}" onclick="toggleDone()">${showDone?'hide':'show'} ${done.length} completed</span>`:''}
     </div>
   </div>`;
 }
 
-// ── Render ───────────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────
 function render() {
-  const cols = TIERS.map(columnHtml).join('');
+  const triageActive=currentTab==='triage';
   document.getElementById('app').innerHTML = `
     ${headerHtml()}
+    <div class="tabs">
+      <button class="tab${triageActive?' active':''}" onclick="switchTab('triage')">Board</button>
+      <button class="tab${!triageActive?' active':''}" onclick="switchTab('buckets')">By Bucket</button>
+    </div>
     ${doneLogHtml()}
-    <div class="board">${cols}</div>
+    ${triageActive
+      ? `<div class="board">${TIERS.map(colHtml).join('')}</div>`
+      : `<div class="bucket-view">${AREAS.map(bucketSectionHtml).join('')}</div>`
+    }
   `;
 }
 
-// ── Actions ──────────────────────────────────────────────────
-function completeItem(id) {
-  items = items.map(i => i.id === id ? {...i, done:true, completedAt:new Date().toISOString()} : i);
-  closeAll(); saveLocal(); render();
-}
-function restoreItem(id) {
-  items = items.map(i => i.id === id ? {...i, done:false, completedAt:null} : i);
-  saveLocal(); render();
-}
-function deleteItem(id) {
-  items = items.filter(i => i.id !== id);
-  closeAll(); saveLocal(); render();
-}
-function moveItem(id, tierId) {
-  items = items.map(i => i.id === id ? {...i, tier:tierId} : i);
-  closeAll(); saveLocal(); render();
-}
-function toggleDone() {
-  showDone = !showDone; render();
-}
-
-// ── Date popover ─────────────────────────────────────────────
-function toggleDate(e, id) {
-  e.stopPropagation();
-  const pop = document.getElementById('datepop-' + id);
-  if (!pop) return;
-  const wasOpen = openDateId === id;
-  closeAll();
-  if (!wasOpen) { pop.style.display = 'block'; openDateId = id; }
-}
-function saveDate(id) {
-  const val = document.getElementById('dateinput-' + id)?.value || null;
-  items = items.map(i => i.id === id ? {...i, date: val||null} : i);
-  closeAll(); saveLocal(); render();
-}
-function clearDate(id) {
-  items = items.map(i => i.id === id ? {...i, date:null} : i);
-  closeAll(); saveLocal(); render();
-}
-
-// ── Menu ─────────────────────────────────────────────────────
-function toggleMenu(e, id) {
-  e.stopPropagation();
-  const menu = document.getElementById('menu-' + id);
-  if (!menu) return;
-  const wasOpen = openMenuId === id;
-  closeAll();
-  if (!wasOpen) { menu.style.display = 'block'; openMenuId = id; }
-}
-function closeAll() {
-  if (openMenuId) { const m = document.getElementById('menu-' + openMenuId); if (m) m.style.display = 'none'; openMenuId = null; }
-  if (openDateId) { const d = document.getElementById('datepop-' + openDateId); if (d) d.style.display = 'none'; openDateId = null; }
-}
-document.addEventListener('click', closeAll);
-
-// ── Add form ─────────────────────────────────────────────────
-function openAddForm(tierId) {
-  const wrap = document.getElementById('addform-wrap-' + tierId);
-  const btn = document.getElementById('addbtn-' + tierId);
-  if (!wrap) return;
-  wrap.innerHTML = addFormHtml(tierId);
-  btn.style.display = 'none';
-  const inp = document.getElementById('addtext-' + tierId);
-  if (inp) inp.focus();
-}
-function closeAddForm(tierId) {
-  const wrap = document.getElementById('addform-wrap-' + tierId);
-  const btn = document.getElementById('addbtn-' + tierId);
-  if (wrap) wrap.innerHTML = '';
-  if (btn) btn.style.display = '';
-}
-function addFormKey(e, tierId) {
-  if (e.key === 'Enter') submitAdd(tierId);
-  if (e.key === 'Escape') closeAddForm(tierId);
-}
-function submitAdd(tierId) {
-  const text = document.getElementById('addtext-' + tierId)?.value.trim();
-  if (!text) return;
-  const area = document.getElementById('addarea-' + tierId)?.value || 'Admin';
-  const date = document.getElementById('adddate-' + tierId)?.value || null;
-  items.push({ id: nextId(), text, area, tier: tierId, date, done: false });
-  saveLocal(); render();
-}
-
-// ── Drag & Drop ──────────────────────────────────────────────
-function onDragStart(e, id) {
-  dragId = id;
-  e.dataTransfer.effectAllowed = 'move';
-  setTimeout(() => render(), 0);
-}
-function onDragEnd() {
-  dragId = null; dragOverTier = null; dragOverId = null;
-  render();
-}
-function onColDragOver(e, tierId) {
-  e.preventDefault();
-  if (dragOverTier !== tierId) { dragOverTier = tierId; render(); }
-}
-function onCardDragOver(e, cardId) {
-  e.preventDefault(); e.stopPropagation();
-  if (dragOverId !== cardId) { dragOverId = cardId; }
-}
-function onDrop(tierId) {
-  if (dragId == null) return;
-  const dragged = items.find(i => i.id === dragId);
-  if (!dragged) return;
-
-  // If dropping onto a specific card, reorder within/across
-  if (dragOverId && dragOverId !== dragId) {
-    const target = items.find(i => i.id === dragOverId);
-    if (target) {
-      // Move dragged item to target's tier and position
-      const newItems = items.filter(i => i.id !== dragId);
-      const targetIdx = newItems.findIndex(i => i.id === dragOverId);
-      const updated = {...dragged, tier: target.tier};
-      newItems.splice(targetIdx, 0, updated);
-      items = newItems;
-    }
-  } else {
-    // Just move to column
-    items = items.map(i => i.id === dragId ? {...i, tier: tierId} : i);
-  }
-
-  dragId = null; dragOverTier = null; dragOverId = null;
-  saveLocal(); render();
-}
-
-// ── Init from Sheet ──────────────────────────────────────────
-function mapSheetToItems(rows) {
-  // headers: ID,Title,Bucket,Type,Status,Priority,Due Date,Notes
-  return rows.slice(1).filter(r => r[0]).map((r, idx) => {
-    const status = (r[4]||'').toLowerCase();
-    const done = status === 'done' || status === 'completed';
-    // Map to tier based on Priority and Type
-    let tier = 't2';
-    const priority = (r[5]||'').toLowerCase();
-    const type = (r[3]||'').toLowerCase();
-    if (priority === 'priority') tier = 't1';
-    else if (type === 'project') tier = 't3';
-    return {
-      id: parseInt(r[0]) || (idx + 1),
-      text: r[1] || '',
-      area: r[2] || 'Admin',
-      tier,
-      date: r[6] || null,
-      done,
-      completedAt: done ? new Date().toISOString() : null,
-      notes: r[7] || ''
-    };
-  }).filter(i => i.text);
-}
-
-async function loadFromSheet() {
-  try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-    const res = await fetch(url);
-    const csv = await res.text();
-    const rows = csv.split('\n').map(r => r.split(',').map(c => c.replace(/^"|"$/g,'').trim()));
-    const sheetItems = mapSheetToItems(rows);
-    if (sheetItems.length > 0) {
-      items = sheetItems;
-      saveLocal();
-    }
-  } catch(e) {
-    console.warn('Sheet load failed, using local data');
-  }
-}
-
-async function init() {
-  // Try local first for instant load
-  const local = loadLocal();
-  if (local && local.length) { items = local; render(); }
-  // Then sync from sheet
-  await loadFromSheet();
+// ── Init ──────────────────────────────────────────────────────
+function init() {
+  const local = load();
+  items = (local && local.length) ? local : SEED;
   render();
 }
 
