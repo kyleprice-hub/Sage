@@ -3,923 +3,500 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sage — Kyle's Task Manager</title>
+<title>Sage — Kyle's Board</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #F7F5F0; color: #111; min-height: 100vh; }
 
-  :root {
-    --bg: #F7F5F0;
-    --surface: #FFFFFF;
-    --border: #E8E4DC;
-    --text: #1A1A18;
-    --muted: #8A8778;
-    --accent: #3D6B4F;
-    --accent-light: #EAF1EC;
-    --danger: #C0392B;
-    --warn: #D4882A;
-    --bucket-admin: #4A6FA5;
-    --bucket-house: #7B5EA7;
-    --bucket-family: #C0392B;
-    --bucket-bufala: #2E86AB;
-    --bucket-regen: #3D6B4F;
-    --bucket-personal: #D4882A;
-    --bucket-building: #555555;
-  }
+.app { padding: 16px 12px; max-width: 1100px; margin: 0 auto; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* Header */
+.header { display: flex; align-items: center; margin-bottom: 14px; gap: 10px; flex-wrap: wrap; }
+.header-title { font-size: 18px; font-weight: 500; color: #111; }
+.header-sub { font-size: 11px; color: #aaa; margin-top: 2px; }
+.header-badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-left: auto; }
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; border: 0.5px solid; white-space: nowrap; cursor: default; }
+.badge-overdue { background: #FCEBEB; color: #A32D2D; border-color: #F09595; }
+.badge-soon { background: #FAEEDA; color: #633806; border-color: #FAC775; }
+.badge-done { background: transparent; color: #888; border-color: #ccc; cursor: pointer; }
+.badge-done.active { background: #E1F5EE; color: #0F6E56; border-color: #5DCAA5; }
 
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-  }
+/* Board */
+.board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (max-width: 900px) { .board { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .board { grid-template-columns: 1fr; } }
 
-  /* HEADER */
-  header {
-    background: var(--text);
-    color: white;
-    padding: 16px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
+/* Column */
+.column { border-radius: 12px; padding: 12px; min-height: 120px; border: 0.5px solid #e0e0e0; background: #f8f8f8; transition: background 0.15s, border-color 0.15s; }
+.column.drag-over { background: #f0f0f0; }
+.col-header { display: flex; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 0.5px solid #eee; }
+.col-title { flex: 1; }
+.col-title-main { font-size: 13px; font-weight: 500; color: #111; }
+.col-title-sub { font-size: 11px; color: #aaa; margin-top: 1px; }
+.col-count { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; border: 0.5px solid; }
 
-  header h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-  }
+/* Card */
+.card { background: #fff; border: 0.5px solid #e0e0e0; border-radius: 8px; padding: 7px 8px; margin-bottom: 4px; cursor: grab; position: relative; transition: opacity 0.15s, box-shadow 0.15s; user-select: none; }
+.card:active { cursor: grabbing; }
+.card.dragging { opacity: 0.35; }
+.card.graveyard { opacity: 0.6; }
+.card.drag-target { box-shadow: 0 0 0 2px #85B7EB; }
+.card-body { display: flex; align-items: flex-start; gap: 6px; }
+.card-check { flex-shrink: 0; margin-top: 2px; width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid #ccc; cursor: pointer; background: transparent; display: flex; align-items: center; justify-content: center; }
+.card-check:hover { border-color: #5DCAA5; }
+.card-content { flex: 1; min-width: 0; }
+.card-text { font-size: 12px; color: #111; line-height: 1.4; }
+.card-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.card-area { font-size: 10px; color: #888; }
+.card-menu-wrap { position: relative; flex-shrink: 0; }
+.card-menu-btn { background: none; border: none; color: #aaa; cursor: pointer; font-size: 16px; padding: 0 2px; line-height: 1; }
+.card-menu-btn:hover { color: #555; }
+.card-menu { position: absolute; right: 0; top: 100%; z-index: 300; background: #fff; border: 0.5px solid #ccc; border-radius: 8px; padding: 4px 0; min-width: 155px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.card-menu-item { padding: 6px 12px; font-size: 12px; cursor: pointer; color: #111; white-space: nowrap; }
+.card-menu-item:hover { background: #f5f5f5; }
+.card-menu-item.green { color: #0F6E56; }
+.card-menu-item.green:hover { background: #E1F5EE; }
+.card-menu-item.red { color: #A32D2D; }
+.card-menu-item.red:hover { background: #FCEBEB; }
+.card-menu-divider { border-top: 0.5px solid #eee; margin: 4px 0; }
 
-  header .subtitle {
-    font-size: 11px;
-    color: rgba(255,255,255,0.45);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-top: 2px;
-  }
+/* Date badge */
+.date-badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; cursor: pointer; border: 0.5px solid; white-space: nowrap; user-select: none; }
+.date-badge.none { background: transparent; border-color: #B4B2A9; color: #888780; }
+.date-badge.set { background: #E6F1FB; border-color: #85B7EB; color: #0C447C; }
+.date-badge.soon { background: #FAEEDA; border-color: #FAC775; color: #633806; }
+.date-badge.overdue { background: #FCEBEB; border-color: #F09595; color: #A32D2D; }
+.date-popover { position: absolute; z-index: 200; top: calc(100% + 4px); left: 0; background: #fff; border: 0.5px solid #ccc; border-radius: 10px; padding: 10px; min-width: 190px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.date-popover input { width: 100%; font-size: 12px; margin-bottom: 8px; border-radius: 6px; border: 0.5px solid #ccc; padding: 4px 6px; }
+.date-popover-btns { display: flex; gap: 6px; }
+.date-popover-btns button { flex: 1; font-size: 11px; padding: 4px 0; border-radius: 6px; cursor: pointer; }
+.date-save-btn { border: 0.5px solid #85B7EB; background: #E6F1FB; color: #0C447C; }
+.date-clear-btn { border: 0.5px solid #F09595; background: transparent; color: #A32D2D; }
 
-  .header-right {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
+/* Add item */
+.add-btn-row { width: 100%; background: none; border: 0.5px dashed #ddd; border-radius: 8px; padding: 6px 0; font-size: 12px; color: #aaa; cursor: pointer; margin-top: 2px; }
+.add-btn-row:hover { border-color: #aaa; color: #555; }
+.add-form { background: #fff; border: 0.5px solid #ccc; border-radius: 8px; padding: 8px; margin-top: 4px; }
+.add-form input, .add-form select { font-size: 12px; border: 0.5px solid #ddd; border-radius: 6px; padding: 5px 8px; width: 100%; margin-bottom: 6px; font-family: inherit; outline: none; }
+.add-form input:focus, .add-form select:focus { border-color: #85B7EB; }
+.add-form-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.add-form-row select, .add-form-row input { margin-bottom: 0; flex: 1; }
+.add-form-actions { display: flex; gap: 6px; }
+.add-form-actions button { flex: 1; font-size: 11px; padding: 5px 0; border-radius: 6px; cursor: pointer; font-family: inherit; }
+.add-submit { border: 0.5px solid #85B7EB; background: #E6F1FB; color: #0C447C; }
+.add-cancel { border: 0.5px solid #ddd; background: none; color: #888; }
 
-  .sync-btn {
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: white;
-    padding: 6px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    font-family: 'Inter', sans-serif;
-    transition: background 0.15s;
-  }
-  .sync-btn:hover { background: rgba(255,255,255,0.2); }
-
-  .sheet-link {
-    font-size: 11px;
-    color: rgba(255,255,255,0.4);
-    text-decoration: none;
-    letter-spacing: 0.04em;
-  }
-  .sheet-link:hover { color: rgba(255,255,255,0.7); }
-
-  /* LAYOUT */
-  .app {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    min-height: calc(100vh - 60px);
-  }
-
-  /* SIDEBAR */
-  sidebar {
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    padding: 20px 0;
-    position: sticky;
-    top: 60px;
-    height: calc(100vh - 60px);
-    overflow-y: auto;
-  }
-
-  .sidebar-section {
-    margin-bottom: 8px;
-  }
-
-  .sidebar-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 0 20px 8px;
-  }
-
-  .bucket-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 20px;
-    cursor: pointer;
-    transition: background 0.1s;
-    border-left: 3px solid transparent;
-  }
-
-  .bucket-item:hover { background: var(--bg); }
-  .bucket-item.active {
-    background: var(--accent-light);
-    border-left-color: var(--accent);
-  }
-
-  .bucket-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .bucket-name {
-    flex: 1;
-    font-weight: 500;
-    font-size: 13px;
-  }
-
-  .bucket-count {
-    font-size: 11px;
-    color: var(--muted);
-    background: var(--bg);
-    padding: 1px 6px;
-    border-radius: 10px;
-  }
-
-  /* MAIN */
-  main {
-    padding: 24px 28px;
-    max-width: 900px;
-  }
-
-  .main-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-
-  .main-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    font-weight: 500;
-  }
-
-  .main-controls {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  select, input[type="text"] {
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    padding: 6px 10px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--surface);
-    color: var(--text);
-    outline: none;
-  }
-  select:focus, input:focus { border-color: var(--accent); }
-
-  .add-btn {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 7px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    transition: opacity 0.15s;
-  }
-  .add-btn:hover { opacity: 0.88; }
-
-  /* STATS ROW */
-  .stats-row {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 16px;
-    flex: 1;
-  }
-
-  .stat-value {
-    font-size: 22px;
-    font-weight: 600;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-  }
-
-  /* TASK TABLE */
-  .task-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 16px;
-  }
-
-  .task-section-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .task-section-header:hover { background: #F0EDE6; }
-
-  .section-bucket-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .section-title {
-    font-weight: 600;
-    font-size: 13px;
-    flex: 1;
-  }
-
-  .section-chevron {
-    color: var(--muted);
-    font-size: 11px;
-    transition: transform 0.2s;
-  }
-  .section-chevron.collapsed { transform: rotate(-90deg); }
-
-  .task-list { }
-
-  .task-row {
-    display: grid;
-    grid-template-columns: 28px 1fr 80px 70px 90px 28px;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 16px;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.1s;
-  }
-  .task-row:last-child { border-bottom: none; }
-  .task-row:hover { background: #FAFAF8; }
-  .task-row.done { opacity: 0.45; }
-  .task-row.done .task-title { text-decoration: line-through; }
-
-  .task-check {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--accent);
-    cursor: pointer;
-  }
-
-  .task-title {
-    font-size: 13px;
-    line-height: 1.4;
-  }
-
-  .task-type {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--muted);
-    background: var(--bg);
-    padding: 2px 6px;
-    border-radius: 4px;
-    text-align: center;
-  }
-
-  .priority-badge {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--danger);
-    text-align: center;
-  }
-  .priority-blank { visibility: hidden; }
-
-  .task-due {
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  .task-delete {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 14px;
-    opacity: 0;
-    transition: opacity 0.15s;
-    padding: 2px;
-  }
-  .task-row:hover .task-delete { opacity: 0.5; }
-  .task-delete:hover { opacity: 1 !important; color: var(--danger); }
-
-  /* ADD TASK FORM */
-  .add-form {
-    display: none;
-    background: var(--surface);
-    border: 1px solid var(--accent);
-    border-radius: 10px;
-    padding: 18px 20px;
-    margin-bottom: 16px;
-    gap: 12px;
-    flex-direction: column;
-  }
-  .add-form.visible { display: flex; }
-
-  .form-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .form-row input, .form-row select {
-    flex: 1;
-    min-width: 140px;
-  }
-
-  .form-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-  }
-
-  .cancel-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 6px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    font-family: 'Inter', sans-serif;
-  }
-
-  /* LOADING / EMPTY */
-  .loading {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted);
-    font-size: 13px;
-  }
-
-  .spinner {
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 12px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--text);
-    color: white;
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-size: 13px;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.25s;
-    z-index: 200;
-    pointer-events: none;
-  }
-  .toast.show { opacity: 1; transform: translateY(0); }
-
-  /* SEARCH */
-  .search-input {
-    width: 200px;
-  }
-
-  /* COLUMN HEADERS */
-  .task-header {
-    display: grid;
-    grid-template-columns: 28px 1fr 80px 70px 90px 28px;
-    gap: 8px;
-    padding: 7px 16px;
-    border-bottom: 1px solid var(--border);
-    background: #FAFAF8;
-  }
-  .task-header span {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
+/* Completed log */
+.done-log { background: #f8f8f8; border: 0.5px solid #e0e0e0; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+.done-log-header { font-size: 13px; font-weight: 500; color: #111; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 0.5px solid #eee; display: flex; align-items: center; gap: 8px; }
+.done-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-bottom: 0.5px solid #eee; }
+.done-row:last-child { border-bottom: none; }
+.done-check { color: #5DCAA5; font-size: 13px; flex-shrink: 0; }
+.done-text { flex: 1; min-width: 0; font-size: 12px; color: #666; text-decoration: line-through; }
+.done-area { font-size: 10px; color: #aaa; margin-left: 6px; }
+.done-date { font-size: 10px; color: #aaa; white-space: nowrap; flex-shrink: 0; }
+.done-restore { background: none; border: 0.5px solid #ddd; border-radius: 6px; font-size: 10px; padding: 2px 7px; cursor: pointer; color: #888; flex-shrink: 0; }
+.done-restore:hover { border-color: #888; color: #444; }
 </style>
 </head>
 <body>
-
-<header>
-  <div>
-    <h1>Sage</h1>
-    <div class="subtitle">Kyle's Task Manager</div>
-  </div>
-  <div class="header-right">
-    <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/17sGkXNtDCTUlOWWd9u8I5ZWH7IPfgOsNwkbMWllKNY4" target="_blank">Open in Sheets ↗</a>
-    <button class="sync-btn" onclick="loadTasks()">↻ Sync</button>
-  </div>
-</header>
-
-<div class="app">
-  <sidebar id="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">View</div>
-      <div class="bucket-item active" data-bucket="All" onclick="selectBucket('All', this)">
-        <div class="bucket-dot" style="background:#888"></div>
-        <span class="bucket-name">All Tasks</span>
-        <span class="bucket-count" id="count-All">–</span>
-      </div>
-      <div class="bucket-item" data-bucket="High Priority" onclick="selectBucket('High Priority', this)">
-        <div class="bucket-dot" style="background:var(--danger)"></div>
-        <span class="bucket-name">Priority</span>
-        <span class="bucket-count" id="count-High Priority">–</span>
-      </div>
-    </div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Buckets</div>
-      <div class="bucket-item" data-bucket="Admin" onclick="selectBucket('Admin', this)">
-        <div class="bucket-dot" style="background:var(--bucket-admin)"></div>
-        <span class="bucket-name">Admin</span>
-        <span class="bucket-count" id="count-Admin">–</span>
-      </div>
-      <div class="bucket-item" data-bucket="Family" onclick="selectBucket('Family', this)">
-        <div class="bucket-dot" style="background:var(--bucket-family)"></div>
-        <span class="bucket-name">Family</span>
-        <span class="bucket-count" id="count-Family">–</span>
-      </div>
-      <div class="bucket-item" data-bucket="House" onclick="selectBucket('House', this)">
-        <div class="bucket-dot" style="background:var(--bucket-house)"></div>
-        <span class="bucket-name">House</span>
-        <span class="bucket-count" id="count-House">–</span>
-      </div>
-      <div class="bucket-item" data-bucket="Bufala" onclick="selectBucket('Bufala', this)">
-        <div class="bucket-dot" style="background:var(--bucket-bufala)"></div>
-        <span class="bucket-name">Bufala</span>
-        <span class="bucket-count" id="count-Bufala">–</span>
-      </div>
-      <div class="bucket-item" data-bucket="Regen Ag" onclick="selectBucket('Regen Ag', this)">
-        <div class="bucket-dot" style="background:var(--bucket-regen)"></div>
-        <span class="bucket-name">Regen Ag</span>
-        <span class="bucket-count" id="count-Regen Ag">–</span>
-      </div>
-      <div class="bucket-item" data-bucket="Personal" onclick="selectBucket('Personal', this)">
-        <div class="bucket-dot" style="background:var(--bucket-personal)"></div>
-        <span class="bucket-name">Personal</span>
-        <span class="bucket-count" id="count-Personal">–</span>
-      </div>
-      <div class="bucket-item" data-bucket="Building" onclick="selectBucket('Building', this)">
-        <div class="bucket-dot" style="background:var(--bucket-building)"></div>
-        <span class="bucket-name">Building</span>
-        <span class="bucket-count" id="count-Building">–</span>
-      </div>
-    </div>
-  </sidebar>
-
-  <main>
-    <div class="main-header">
-      <div class="main-title" id="main-title">All Tasks</div>
-      <div class="main-controls">
-        <input type="text" class="search-input" placeholder="Search tasks…" oninput="renderTasks()" id="search">
-        <select id="filter-status" onchange="renderTasks()">
-          <option value="Open">Open</option>
-          <option value="Done">Done</option>
-          <option value="">All</option>
-        </select>
-        <select id="filter-type" onchange="renderTasks()">
-          <option value="">All types</option>
-          <option value="Task">Tasks</option>
-          <option value="Project">Projects</option>
-        </select>
-        <button class="add-btn" onclick="toggleAddForm()">+ Add</button>
-      </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-row" id="stats-row">
-      <div class="stat-card">
-        <div class="stat-value" id="stat-open">–</div>
-        <div class="stat-label">Open</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-high">–</div>
-        <div class="stat-label">Priority</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-done">–</div>
-        <div class="stat-label">Done</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-projects">–</div>
-        <div class="stat-label">Projects</div>
-      </div>
-    </div>
-
-    <!-- Add Form -->
-    <div class="add-form" id="add-form">
-      <div class="form-row">
-        <input type="text" id="new-title" placeholder="Task title…" style="flex:2">
-        <select id="new-bucket">
-          <option value="Admin">Admin</option>
-          <option value="Family">Family</option>
-          <option value="House">House</option>
-          <option value="Bufala">Bufala</option>
-          <option value="Regen Ag">Regen Ag</option>
-          <option value="Personal">Personal</option>
-          <option value="Building">Building</option>
-        </select>
-        <select id="new-type">
-          <option value="Task">Task</option>
-          <option value="Project">Project</option>
-        </select>
-        <select id="new-priority">
-          <option value="">No priority</option>
-          <option value="Priority">Priority</option>
-        </select>
-        <input type="text" id="new-due" placeholder="Due date (optional)">
-      </div>
-      <div class="form-actions">
-        <button class="cancel-btn" onclick="toggleAddForm()">Cancel</button>
-        <button class="add-btn" onclick="addTask()">Add Task</button>
-      </div>
-    </div>
-
-    <!-- Task List -->
-    <div id="task-container">
-      <div class="loading">
-        <div class="spinner"></div>
-        Loading tasks from Google Sheets…
-      </div>
-    </div>
-  </main>
+<div class="app" id="app">
+  <div style="padding:40px;text-align:center;color:#aaa;font-size:13px;">Loading…</div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-const SHEET_ID = '1p-leZKhhNPWLbRo9Td27qaGU6-npkCnK-z7ZF-GqmDc';
+const SHEET_ID = '1AvsNbN7TmxlOqbuHxUIPM1c8ONSzdGxmKRFO_uGZNKg';
+const STORAGE_KEY = 'sage-triage-v2';
+const TIERS = [
+  { id:'t1', label:'On the clock',       sub:'Deadlines & consequences', color:'#A32D2D', bg:'#FCEBEB', border:'#F09595' },
+  { id:'t2', label:'Active backlog',     sub:'No fire, real value',      color:'#633806', bg:'#FAEEDA', border:'#FAC775' },
+  { id:'t3', label:'Important + patient',sub:'Goals live here',          color:'#0C447C', bg:'#E6F1FB', border:'#85B7EB' },
+  { id:'gy', label:'Graveyard',          sub:'Honored but released',     color:'#444441', bg:'#F1EFE8', border:'#B4B2A9' },
+];
 const BUCKET_COLORS = {
-  Admin: '#4A6FA5', House: '#7B5EA7', Family: '#C0392B',
-  Bufala: '#2E86AB', 'Regen Ag': '#3D6B4F', Personal: '#D4882A', Building: '#555555'
+  Admin:'#4A6FA5', House:'#7B5EA7', Family:'#C0392B',
+  Bufala:'#2E86AB', 'Regen Ag':'#3D6B4F', Personal:'#D4882A', Building:'#555555'
 };
+const AREAS = ['Admin','Family','House','Bufala','Building','Regen Ag','Personal'];
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 
-let tasks = [];
-let currentBucket = 'All';
-let collapsedSections = new Set();
+let items = [];
+let dragId = null;
+let dragOverTier = null;
+let dragOverId = null; // for within-column ordering
+let openMenuId = null;
+let openDateId = null;
+let showDone = false;
 
-function bucketColor(b) { return BUCKET_COLORS[b] || '#888'; }
-
-async function loadTasks() {
-  document.getElementById('task-container').innerHTML = `
-    <div class="loading"><div class="spinner"></div>Syncing with Google Sheets…</div>`;
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        system: `You read a Google Sheets CSV and return the tasks as a JSON array. 
-Return ONLY a JSON array, no markdown, no explanation.
-Each item: {id, title, bucket, type, status, priority, dueDate, notes}`,
-        messages: [{
-          role: "user",
-          content: `Read this Google Sheet and return all tasks as JSON array: https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`,
-        }],
-        tools: [{
-          type: "web_search_20250305",
-          name: "web_search"
-        }],
-        mcp_servers: [{
-          type: "url",
-          url: "https://drivemcp.googleapis.com/mcp/v1",
-          name: "gdrive"
-        }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('');
-    const clean = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
-    tasks = parsed;
-    updateCounts();
-    renderTasks();
-    showToast('Synced ✓');
-  } catch(e) {
-    // Fallback: load from embedded data
-    loadFallback();
-  }
+// ── Storage ──────────────────────────────────────────────────
+function saveLocal() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch {}
+}
+function loadLocal() {
+  try { const d = localStorage.getItem(STORAGE_KEY); if (d) return JSON.parse(d); } catch {}
+  return null;
 }
 
-function loadFallback() {
-  // Embedded task data (mirrors the sheet)
-  tasks = [
-    {id:1,title:"Investment decision (RBLX)",bucket:"Admin",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:2,title:"Etrade move to UBS",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:3,title:"Update LinkedIn",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:4,title:"Registration and cop sign-off",bucket:"Admin",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:5,title:"Front license plate",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:6,title:"House and car maintenance log",bucket:"Admin",type:"Project",status:"Open",priority:"",dueDate:"",notes:"Build with AI"},
-    {id:7,title:"Glasses case - call to get it",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:8,title:"Antoine wedding gift",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:9,title:"WaDrew shirt",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:10,title:"Drew hairspray",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:11,title:"Reconnect with Brad Matthews",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:12,title:"Reconnect with Vijay",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:13,title:"Reconnect with Craig Sherman",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:14,title:"Reconnect with Craig Donato",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:15,title:"Reconnect with Hutch",bucket:"Admin",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:16,title:"Network outreach - food/ag list",bucket:"Admin",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:17,title:"Parents trip - plan",bucket:"Admin",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:102,title:"Book Tennessee flights",bucket:"Admin",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:18,title:"Caulking in bathroom",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:19,title:"Air vent in studio - clean and organize",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:20,title:"Water filter",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:21,title:"Clean and reorganize pantry",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:22,title:"Sound protection for X and E's rooms",bucket:"House",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:23,title:"Latch to hold back doors open",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:24,title:"Top door lock closed latch",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:25,title:"Smart electricity meter / PGE setup",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:26,title:"Roof on sauna",bucket:"House",type:"Project",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:27,title:"Pool blanket",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:28,title:"Wipe down outside of house",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:29,title:"Turf under cold plunge",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:30,title:"Bar or rings to hang in backyard",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:31,title:"Mood board for studio",bucket:"House",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:34,title:"Jeep - under dash wires",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:35,title:"Jeep - fix gas gauge",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:36,title:"Jeep - condition or replace soft top",bucket:"House",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:40,title:"X baseball camp options and tryouts",bucket:"Family",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:41,title:"George - schedule appt with Dr. Tyler",bucket:"Family",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:42,title:"Kids gut health (E specifically)",bucket:"Family",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:43,title:"Block YouTube and Shorts on kids iPads",bucket:"Family",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:44,title:"E - complete profile and assessment deep dive",bucket:"Family",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:45,title:"Draft parenting principles with Celeste",bucket:"Family",type:"Project",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:46,title:"Tony Robbins parenting framework + infographic",bucket:"Family",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:47,title:"Family debate night - set up format",bucket:"Family",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:48,title:"Movie nights - schedule recurring",bucket:"Family",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:49,title:"Franco order - 32 balls mozz, collect $100",bucket:"Bufala",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:50,title:"Consulting payment transfer",bucket:"Bufala",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:51,title:"Financial model - update and share with Ty",bucket:"Bufala",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:52,title:"LT vision meeting with Ty",bucket:"Bufala",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:53,title:"Update business registration address",bucket:"Bufala",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:54,title:"Check all insurance and permits",bucket:"Bufala",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:55,title:"Ongoing expenses list",bucket:"Bufala",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:57,title:"Taxes - file through TurboTax",bucket:"Bufala",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:64,title:"Fix or redesign Bufala ecommerce",bucket:"Bufala",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:67,title:"RFSI Boot Camp - register online",bucket:"Regen Ag",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:68,title:"RFSI Forum - October Colorado",bucket:"Regen Ag",type:"Task",status:"Open",priority:"",dueDate:"October",notes:""},
-    {id:72,title:"Read - The Dorito Effect",bucket:"Regen Ag",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:73,title:"Read - Sacred Cow",bucket:"Regen Ag",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:74,title:"Read - The Big Fat Surprise",bucket:"Regen Ag",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:77,title:"Course - understandingag.com Regen Ag 101",bucket:"Regen Ag",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:82,title:"Meat box - find regenerative delivery service",bucket:"Regen Ag",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:83,title:"Journal on Roblox and Dave lessons",bucket:"Personal",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:84,title:"Tony Robbins coaching free trial",bucket:"Personal",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:85,title:"Immersive experience - research and commit",bucket:"Personal",type:"Project",status:"Open",priority:"",dueDate:"",notes:"Hoffman etc"},
-    {id:88,title:"Achilles - volunteer at running event",bucket:"Personal",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:89,title:"Banjo - actually practice",bucket:"Personal",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:90,title:"Harmonica - actually practice",bucket:"Personal",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:91,title:"Martial arts - find class and start",bucket:"Personal",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:92,title:"Trips - book something",bucket:"Personal",type:"Task",status:"Open",priority:"Priority",dueDate:"",notes:""},
-    {id:93,title:"Parent agent - first working version",bucket:"Building",type:"Project",status:"Open",priority:"Priority",dueDate:"",notes:"Family Unit"},
-    {id:94,title:"Grocery/meal planning app - use and refine",bucket:"Building",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:95,title:"WhisperFlow - set up voice-to-text",bucket:"Building",type:"Task",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:99,title:"Mind map - overall life areas",bucket:"Building",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-    {id:100,title:"Mind map - parenting principles",bucket:"Building",type:"Project",status:"Open",priority:"",dueDate:"",notes:""},
-  ];
-  updateCounts();
-  renderTasks();
+// ── Date utils ───────────────────────────────────────────────
+function parseDate(s) {
+  if (!s) return null;
+  const d = new Date(s + 'T00:00:00');
+  return isNaN(d) ? null : d;
+}
+function fmtDate(s) {
+  const d = parseDate(s);
+  if (!d) return null;
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+function dateStatus(s) {
+  const d = parseDate(s);
+  if (!d) return 'none';
+  const diff = (d - TODAY) / 86400000;
+  if (diff < 0) return 'overdue';
+  if (diff <= 7) return 'soon';
+  return 'set';
+}
+function fmtCompletedDate(s) {
+  if (!s) return '';
+  return new Date(s).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function nextId() { return Math.max(0, ...items.map(i => i.id)) + 1; }
+
+// ── Bucket tag ───────────────────────────────────────────────
+function bucketTag(area) {
+  const c = BUCKET_COLORS[area] || '#888';
+  return `<span style="font-size:10px;color:${c};font-weight:500;">${area}</span>`;
 }
 
-function updateCounts() {
-  const open = tasks.filter(t => t.status === 'Open');
-  const buckets = ['Admin','House','Family','Bufala','Regen Ag','Personal','Building'];
-  buckets.forEach(b => {
-    const el = document.getElementById('count-' + b);
-    if (el) el.textContent = open.filter(t => t.bucket === b).length;
-  });
-  const allEl = document.getElementById('count-All');
-  if (allEl) allEl.textContent = open.length;
-  const hpEl = document.getElementById('count-High Priority');
-  if (hpEl) hpEl.textContent = open.filter(t => t.priority === "Priority").length;
-
-  document.getElementById('stat-open').textContent = open.length;
-  document.getElementById('stat-high').textContent = open.filter(t => t.priority === 'Priority').length;
-  document.getElementById('stat-done').textContent = tasks.filter(t => t.status === 'Done').length;
-  document.getElementById('stat-projects').textContent = open.filter(t => t.type === 'Project').length;
+// ── Date badge ───────────────────────────────────────────────
+function dateBadgeHtml(item) {
+  if (item.tier === 'gy') return '';
+  const st = dateStatus(item.date);
+  const label = fmtDate(item.date) || '+ date';
+  return `<span class="date-badge ${st}" onclick="toggleDate(event,${item.id})">${label}</span>`;
 }
 
-function getFilteredTasks() {
-  const search = document.getElementById('search').value.toLowerCase();
-  const status = document.getElementById('filter-status').value;
-  const type = document.getElementById('filter-type').value;
-
-  return tasks.filter(t => {
-    if (currentBucket === 'High Priority') { if (t.priority !== "Priority") return false; }
-    else if (currentBucket !== 'All') { if (t.bucket !== currentBucket) return false; }
-    if (status && t.status !== status) return false;
-    if (type && t.type !== type) return false;
-    if (search && !t.title.toLowerCase().includes(search)) return false;
-    return true;
-  });
-}
-
-function renderTasks() {
-  const filtered = getFilteredTasks();
-  const container = document.getElementById('task-container');
-
-  if (filtered.length === 0) {
-    container.innerHTML = `<div class="loading" style="padding:40px">No tasks found.</div>`;
-    return;
-  }
-
-  // Group by bucket if viewing All
-  if (currentBucket === 'All' || currentBucket === 'High Priority') {
-    const groups = {};
-    filtered.forEach(t => {
-      if (!groups[t.bucket]) groups[t.bucket] = [];
-      groups[t.bucket].push(t);
-    });
-    container.innerHTML = Object.entries(groups).map(([bucket, items]) =>
-      renderSection(bucket, items)
-    ).join('');
-  } else {
-    container.innerHTML = renderSection(currentBucket, filtered);
-  }
-}
-
-function renderSection(bucket, items) {
-  const collapsed = collapsedSections.has(bucket);
-  const color = bucketColor(bucket);
+// ── Card ─────────────────────────────────────────────────────
+function cardHtml(item) {
+  const isDragging = dragId === item.id;
+  const isGy = item.tier === 'gy';
+  const otherTiers = TIERS.filter(t => t.id !== item.tier);
+  const moveItems = otherTiers.map(t =>
+    `<div class="card-menu-item" onclick="moveItem(${item.id},'${t.id}')">&rarr; ${t.label}</div>`
+  ).join('');
   return `
-    <div class="task-section">
-      <div class="task-section-header" onclick="toggleSection('${bucket}')">
-        <div class="section-bucket-dot" style="background:${color}"></div>
-        <span class="section-title">${bucket}</span>
-        <span style="font-size:11px;color:#8A8778">${items.length} item${items.length !== 1 ? 's' : ''}</span>
-        <span class="section-chevron ${collapsed ? 'collapsed' : ''}">▾</span>
-      </div>
-      ${collapsed ? '' : `
-        <div class="task-list">
-          <div class="task-header">
-            <span></span>
-            <span>Task</span>
-            <span>Type</span>
-            <span>Priority</span>
-            <span>Due</span>
-            <span></span>
+  <div class="card${isDragging?' dragging':''}${isGy?' graveyard':''}"
+    id="card-${item.id}"
+    draggable="true"
+    ondragstart="onDragStart(event,${item.id})"
+    ondragend="onDragEnd()"
+    ondragover="onCardDragOver(event,${item.id})"
+  >
+    <div class="card-body">
+      <div class="card-check" onclick="completeItem(${item.id})"></div>
+      <div class="card-content">
+        <div class="card-text">${item.text}</div>
+        <div class="card-meta">
+          ${bucketTag(item.area)}
+          <div style="position:relative;display:inline-block">
+            ${dateBadgeHtml(item)}
+            <div class="date-popover" id="datepop-${item.id}" style="display:none">
+              <input type="date" id="dateinput-${item.id}" value="${item.date||''}" />
+              <div class="date-popover-btns">
+                <button class="date-save-btn" onclick="saveDate(${item.id})">Save</button>
+                <button class="date-clear-btn" onclick="clearDate(${item.id})">Clear</button>
+              </div>
+            </div>
           </div>
-          ${items.map(t => renderTask(t)).join('')}
         </div>
-      `}
+      </div>
+      <div class="card-menu-wrap">
+        <button class="card-menu-btn" onclick="toggleMenu(event,${item.id})">···</button>
+        <div class="card-menu" id="menu-${item.id}" style="display:none">
+          <div class="card-menu-item green" onclick="completeItem(${item.id})">✓ Mark complete</div>
+          <div class="card-menu-divider"></div>
+          ${moveItems}
+          <div class="card-menu-divider"></div>
+          <div class="card-menu-item red" onclick="deleteItem(${item.id})">Delete</div>
+        </div>
+      </div>
     </div>
-  `;
+  </div>`;
 }
 
-function renderTask(t) {
-  const done = t.status === 'Done';
+// ── Add form ─────────────────────────────────────────────────
+function addFormHtml(tierId) {
+  const areaOpts = AREAS.map(a => `<option>${a}</option>`).join('');
   return `
-    <div class="task-row ${done ? 'done' : ''}" id="task-${t.id}">
-      <input type="checkbox" class="task-check" ${done ? 'checked' : ''} 
-        onchange="toggleTask(${t.id}, this.checked)">
-      <span class="task-title">${t.title}</span>
-      <span class="task-type">${t.type}</span>
-      <span class="priority-badge ${t.priority === 'Priority' ? '' : 'priority-blank'}">${t.priority === 'Priority' ? '⚑ Priority' : '–'}</span>
-      <span class="task-due">${t.dueDate || ''}</span>
-      <button class="task-delete" onclick="deleteTask(${t.id})" title="Delete">×</button>
+  <div class="add-form" id="addform-${tierId}">
+    <input id="addtext-${tierId}" placeholder="What needs doing…" onkeydown="addFormKey(event,'${tierId}')" />
+    <div class="add-form-row">
+      <select id="addarea-${tierId}">${areaOpts}</select>
+      ${tierId !== 'gy' ? `<input type="date" id="adddate-${tierId}" />` : ''}
     </div>
+    <div class="add-form-actions">
+      <button class="add-submit" onclick="submitAdd('${tierId}')">Add</button>
+      <button class="add-cancel" onclick="closeAddForm('${tierId}')">Cancel</button>
+    </div>
+  </div>`;
+}
+
+// ── Column ───────────────────────────────────────────────────
+function columnHtml(tier) {
+  const mine = items.filter(i => i.tier === tier.id && !i.done);
+  if (tier.id === 't1') {
+    mine.sort((a,b) => {
+      if (a.date && b.date) return new Date(a.date) - new Date(b.date);
+      if (a.date) return -1; if (b.date) return 1; return 0;
+    });
+  }
+  const isOver = dragOverTier === tier.id;
+  const cards = mine.map(cardHtml).join('');
+  return `
+  <div class="column${isOver?' drag-over':''}" id="col-${tier.id}"
+    ondragover="onColDragOver(event,'${tier.id}')"
+    ondrop="onDrop('${tier.id}')">
+    <div class="col-header">
+      <div class="col-title">
+        <div class="col-title-main">${tier.label}</div>
+        <div class="col-title-sub">${tier.sub}</div>
+      </div>
+      <span class="col-count" style="background:${tier.bg};color:${tier.color};border-color:${tier.border}">${mine.length}</span>
+    </div>
+    ${cards}
+    <button class="add-btn-row" id="addbtn-${tier.id}" onclick="openAddForm('${tier.id}')">+ add item</button>
+    <div id="addform-wrap-${tier.id}"></div>
+  </div>`;
+}
+
+// ── Done log ─────────────────────────────────────────────────
+function doneLogHtml() {
+  const done = items.filter(i => i.done).sort((a,b) => new Date(b.completedAt||0) - new Date(a.completedAt||0));
+  if (!showDone || !done.length) return '';
+  const rows = done.map(item => `
+    <div class="done-row">
+      <span class="done-check">✓</span>
+      <div class="done-text">${item.text}<span class="done-area">${item.area}</span></div>
+      <span class="done-date">${fmtCompletedDate(item.completedAt)}</span>
+      <button class="done-restore" onclick="restoreItem(${item.id})">restore</button>
+    </div>`).join('');
+  return `
+  <div class="done-log">
+    <div class="done-log-header">
+      Completed
+      <span class="badge badge-done active">${done.length}</span>
+    </div>
+    ${rows}
+  </div>`;
+}
+
+// ── Header ───────────────────────────────────────────────────
+function headerHtml() {
+  const overdue = items.filter(i => !i.done && i.tier !== 'gy' && dateStatus(i.date) === 'overdue');
+  const soon = items.filter(i => !i.done && i.tier !== 'gy' && dateStatus(i.date) === 'soon');
+  const done = items.filter(i => i.done);
+  return `
+  <div class="header">
+    <div>
+      <div class="header-title">Kyle's board</div>
+      <div class="header-sub" id="save-status">All changes saved</div>
+    </div>
+    <div class="header-badges">
+      ${overdue.length ? `<span class="badge badge-overdue">${overdue.length} overdue</span>` : ''}
+      ${soon.length ? `<span class="badge badge-soon">${soon.length} due soon</span>` : ''}
+      ${done.length ? `<span class="badge badge-done${showDone?' active':''}" onclick="toggleDone()">${showDone?'hide':'show'} ${done.length} completed</span>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── Render ───────────────────────────────────────────────────
+function render() {
+  const cols = TIERS.map(columnHtml).join('');
+  document.getElementById('app').innerHTML = `
+    ${headerHtml()}
+    ${doneLogHtml()}
+    <div class="board">${cols}</div>
   `;
 }
 
-function toggleSection(bucket) {
-  if (collapsedSections.has(bucket)) collapsedSections.delete(bucket);
-  else collapsedSections.add(bucket);
-  renderTasks();
+// ── Actions ──────────────────────────────────────────────────
+function completeItem(id) {
+  items = items.map(i => i.id === id ? {...i, done:true, completedAt:new Date().toISOString()} : i);
+  closeAll(); saveLocal(); render();
+}
+function restoreItem(id) {
+  items = items.map(i => i.id === id ? {...i, done:false, completedAt:null} : i);
+  saveLocal(); render();
+}
+function deleteItem(id) {
+  items = items.filter(i => i.id !== id);
+  closeAll(); saveLocal(); render();
+}
+function moveItem(id, tierId) {
+  items = items.map(i => i.id === id ? {...i, tier:tierId} : i);
+  closeAll(); saveLocal(); render();
+}
+function toggleDone() {
+  showDone = !showDone; render();
 }
 
-function selectBucket(bucket, el) {
-  currentBucket = bucket;
-  document.querySelectorAll('.bucket-item').forEach(i => i.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('main-title').textContent =
-    bucket === 'All' ? 'All Tasks' :
-    bucket === 'High Priority' ? '⚑ Priority' : bucket;
-  renderTasks();
+// ── Date popover ─────────────────────────────────────────────
+function toggleDate(e, id) {
+  e.stopPropagation();
+  const pop = document.getElementById('datepop-' + id);
+  if (!pop) return;
+  const wasOpen = openDateId === id;
+  closeAll();
+  if (!wasOpen) { pop.style.display = 'block'; openDateId = id; }
+}
+function saveDate(id) {
+  const val = document.getElementById('dateinput-' + id)?.value || null;
+  items = items.map(i => i.id === id ? {...i, date: val||null} : i);
+  closeAll(); saveLocal(); render();
+}
+function clearDate(id) {
+  items = items.map(i => i.id === id ? {...i, date:null} : i);
+  closeAll(); saveLocal(); render();
 }
 
-function toggleTask(id, done) {
-  const task = tasks.find(t => t.id === id);
-  if (task) {
-    task.status = done ? 'Done' : 'Open';
-    updateCounts();
-    renderTasks();
-    showToast(done ? `✓ "${task.title}" marked done` : `Reopened`);
-  }
+// ── Menu ─────────────────────────────────────────────────────
+function toggleMenu(e, id) {
+  e.stopPropagation();
+  const menu = document.getElementById('menu-' + id);
+  if (!menu) return;
+  const wasOpen = openMenuId === id;
+  closeAll();
+  if (!wasOpen) { menu.style.display = 'block'; openMenuId = id; }
+}
+function closeAll() {
+  if (openMenuId) { const m = document.getElementById('menu-' + openMenuId); if (m) m.style.display = 'none'; openMenuId = null; }
+  if (openDateId) { const d = document.getElementById('datepop-' + openDateId); if (d) d.style.display = 'none'; openDateId = null; }
+}
+document.addEventListener('click', closeAll);
+
+// ── Add form ─────────────────────────────────────────────────
+function openAddForm(tierId) {
+  const wrap = document.getElementById('addform-wrap-' + tierId);
+  const btn = document.getElementById('addbtn-' + tierId);
+  if (!wrap) return;
+  wrap.innerHTML = addFormHtml(tierId);
+  btn.style.display = 'none';
+  const inp = document.getElementById('addtext-' + tierId);
+  if (inp) inp.focus();
+}
+function closeAddForm(tierId) {
+  const wrap = document.getElementById('addform-wrap-' + tierId);
+  const btn = document.getElementById('addbtn-' + tierId);
+  if (wrap) wrap.innerHTML = '';
+  if (btn) btn.style.display = '';
+}
+function addFormKey(e, tierId) {
+  if (e.key === 'Enter') submitAdd(tierId);
+  if (e.key === 'Escape') closeAddForm(tierId);
+}
+function submitAdd(tierId) {
+  const text = document.getElementById('addtext-' + tierId)?.value.trim();
+  if (!text) return;
+  const area = document.getElementById('addarea-' + tierId)?.value || 'Admin';
+  const date = document.getElementById('adddate-' + tierId)?.value || null;
+  items.push({ id: nextId(), text, area, tier: tierId, date, done: false });
+  saveLocal(); render();
 }
 
-function deleteTask(id) {
-  const task = tasks.find(t => t.id === id);
-  if (!task) return;
-  if (!confirm(`Delete "${task.title}"?`)) return;
-  tasks = tasks.filter(t => t.id !== id);
-  updateCounts();
-  renderTasks();
-  showToast('Task deleted');
+// ── Drag & Drop ──────────────────────────────────────────────
+function onDragStart(e, id) {
+  dragId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => render(), 0);
 }
+function onDragEnd() {
+  dragId = null; dragOverTier = null; dragOverId = null;
+  render();
+}
+function onColDragOver(e, tierId) {
+  e.preventDefault();
+  if (dragOverTier !== tierId) { dragOverTier = tierId; render(); }
+}
+function onCardDragOver(e, cardId) {
+  e.preventDefault(); e.stopPropagation();
+  if (dragOverId !== cardId) { dragOverId = cardId; }
+}
+function onDrop(tierId) {
+  if (dragId == null) return;
+  const dragged = items.find(i => i.id === dragId);
+  if (!dragged) return;
 
-function toggleAddForm() {
-  const form = document.getElementById('add-form');
-  form.classList.toggle('visible');
-  if (form.classList.contains('visible')) {
-    document.getElementById('new-title').focus();
-    // Pre-select current bucket
-    if (currentBucket !== 'All' && currentBucket !== 'High Priority') {
-      document.getElementById('new-bucket').value = currentBucket;
+  // If dropping onto a specific card, reorder within/across
+  if (dragOverId && dragOverId !== dragId) {
+    const target = items.find(i => i.id === dragOverId);
+    if (target) {
+      // Move dragged item to target's tier and position
+      const newItems = items.filter(i => i.id !== dragId);
+      const targetIdx = newItems.findIndex(i => i.id === dragOverId);
+      const updated = {...dragged, tier: target.tier};
+      newItems.splice(targetIdx, 0, updated);
+      items = newItems;
     }
+  } else {
+    // Just move to column
+    items = items.map(i => i.id === dragId ? {...i, tier: tierId} : i);
+  }
+
+  dragId = null; dragOverTier = null; dragOverId = null;
+  saveLocal(); render();
+}
+
+// ── Init from Sheet ──────────────────────────────────────────
+function mapSheetToItems(rows) {
+  // headers: ID,Title,Bucket,Type,Status,Priority,Due Date,Notes
+  return rows.slice(1).filter(r => r[0]).map((r, idx) => {
+    const status = (r[4]||'').toLowerCase();
+    const done = status === 'done' || status === 'completed';
+    // Map to tier based on Priority and Type
+    let tier = 't2';
+    const priority = (r[5]||'').toLowerCase();
+    const type = (r[3]||'').toLowerCase();
+    if (priority === 'priority') tier = 't1';
+    else if (type === 'project') tier = 't3';
+    return {
+      id: parseInt(r[0]) || (idx + 1),
+      text: r[1] || '',
+      area: r[2] || 'Admin',
+      tier,
+      date: r[6] || null,
+      done,
+      completedAt: done ? new Date().toISOString() : null,
+      notes: r[7] || ''
+    };
+  }).filter(i => i.text);
+}
+
+async function loadFromSheet() {
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+    const res = await fetch(url);
+    const csv = await res.text();
+    const rows = csv.split('\n').map(r => r.split(',').map(c => c.replace(/^"|"$/g,'').trim()));
+    const sheetItems = mapSheetToItems(rows);
+    if (sheetItems.length > 0) {
+      items = sheetItems;
+      saveLocal();
+    }
+  } catch(e) {
+    console.warn('Sheet load failed, using local data');
   }
 }
 
-function addTask() {
-  const title = document.getElementById('new-title').value.trim();
-  if (!title) return;
-  const newTask = {
-    id: Date.now(),
-    title,
-    bucket: document.getElementById('new-bucket').value,
-    type: document.getElementById('new-type').value,
-    status: 'Open',
-    priority: document.getElementById('new-priority').value,
-    dueDate: document.getElementById('new-due').value,
-    notes: ''
-  };
-  tasks.unshift(newTask);
-  updateCounts();
-  renderTasks();
-  toggleAddForm();
-  document.getElementById('new-title').value = '';
-  showToast(`Added: ${title}`);
+async function init() {
+  // Try local first for instant load
+  const local = loadLocal();
+  if (local && local.length) { items = local; render(); }
+  // Then sync from sheet
+  await loadFromSheet();
+  render();
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// Enter key in add form
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('add-form').classList.contains('visible')) {
-    if (document.activeElement !== document.querySelector('.cancel-btn')) addTask();
-  }
-  if (e.key === 'Escape') {
-    const form = document.getElementById('add-form');
-    if (form.classList.contains('visible')) toggleAddForm();
-  }
-});
-
-// Init
-loadFallback();
+init();
 </script>
 </body>
 </html>
