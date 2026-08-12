@@ -149,109 +149,10 @@ const AREAS = ['Admin','Family','House','Bufala','Building','Regen Ag','Personal
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 const STORAGE_KEY = 'sage-v3';
 
-// ── Seed data (mirrors Google Sheet) ─────────────────────────
+// ── Seed data ──────────────────────────────────────────────────
+// Only used the very first time a device has no local cache AND the
+// server has no data yet. Real data now lives on the server.
 const SEED = [
-  {id:1,text:"Investment decision (RBLX)",area:"Admin",tier:"t1",date:null,done:false},
-  {id:4,text:"Registration and cop sign-off",area:"Admin",tier:"t1",date:null,done:false},
-  {id:102,text:"Book Tennessee flights",area:"Admin",tier:"t1",date:null,done:false},
-  {id:26,text:"Roof on sauna",area:"House",tier:"t1",date:null,done:false},
-  {id:40,text:"X baseball camp options and tryouts",area:"Family",tier:"t1",date:null,done:false},
-  {id:41,text:"George - schedule appt with Dr. Tyler",area:"Family",tier:"t1",date:null,done:false},
-  {id:43,text:"Block YouTube and Shorts on kids iPads",area:"Family",tier:"t1",date:null,done:false},
-  {id:45,text:"Draft parenting principles with Celeste",area:"Family",tier:"t1",date:null,done:false},
-  {id:49,text:"Franco order - 32 balls mozz, collect $100",area:"Bufala",tier:"t1",date:null,done:false},
-  {id:50,text:"Consulting payment transfer",area:"Bufala",tier:"t1",date:null,done:false},
-  {id:51,text:"Financial model - update and share with Ty",area:"Bufala",tier:"t1",date:null,done:false},
-  {id:57,text:"Taxes - file through TurboTax",area:"Bufala",tier:"t1",date:null,done:false},
-  {id:67,text:"RFSI Boot Camp - register online",area:"Regen Ag",tier:"t1",date:null,done:false},
-  {id:91,text:"Martial arts - find class and start",area:"Personal",tier:"t1",date:null,done:false},
-  {id:92,text:"Trips - book something",area:"Personal",tier:"t1",date:null,done:false},
-  {id:93,text:"Parent agent - first working version",area:"Building",tier:"t1",date:null,done:false},
-  {id:2,text:"Etrade move to UBS",area:"Admin",tier:"t2",date:null,done:false},
-  {id:3,text:"Update LinkedIn",area:"Admin",tier:"t2",date:null,done:false},
-  {id:5,text:"Front license plate",area:"Admin",tier:"t2",date:null,done:false},
-  {id:8,text:"Antoine wedding gift",area:"Admin",tier:"t2",date:null,done:false},
-  {id:11,text:"Reconnect with Brad Matthews",area:"Admin",tier:"t2",date:null,done:false},
-  {id:12,text:"Reconnect with Vijay",area:"Admin",tier:"t2",date:null,done:false},
-  {id:13,text:"Reconnect with Craig Sherman",area:"Admin",tier:"t2",date:null,done:false},
-  {id:14,text:"Reconnect with Craig Donato",area:"Admin",tier:"t2",date:null,done:false},
-  {id:15,text:"Reconnect with Hutch",area:"Admin",tier:"t2",date:null,done:false},
-  {id:16,text:"Network outreach - food/ag list",area:"Admin",tier:"t2",date:null,done:false},
-  {id:18,text:"Caulking in bathroom",area:"House",tier:"t2",date:null,done:false},
-  {id:19,text:"Air vent in studio - clean and organize",area:"House",tier:"t2",date:null,done:false},
-  {id:20,text:"Water filter",area:"House",tier:"t2",date:null,done:false},
-  {id:21,text:"Clean and reorganize pantry",area:"House",tier:"t2",date:null,done:false},
-  {id:27,text:"Pool blanket",area:"House",tier:"t2",date:null,done:false},
-  {id:29,text:"Turf under cold plunge",area:"House",tier:"t2",date:null,done:false},
-  {id:30,text:"Bar or rings to hang in backyard",area:"House",tier:"t2",date:null,done:false},
-  {id:34,text:"Jeep - under dash wires",area:"House",tier:"t2",date:null,done:false},
-  {id:35,text:"Jeep - fix gas gauge",area:"House",tier:"t2",date:null,done:false},
-  {id:36,text:"Jeep - condition or replace soft top",area:"House",tier:"t2",date:null,done:false},
-  {id:42,text:"Kids gut health (E specifically)",area:"Family",tier:"t2",date:null,done:false},
-  {id:52,text:"LT vision meeting with Ty",area:"Bufala",tier:"t2",date:null,done:false},
-  {id:53,text:"Update business registration address",area:"Bufala",tier:"t2",date:null,done:false},
-  {id:54,text:"Check all insurance and permits",area:"Bufala",tier:"t2",date:null,done:false},
-  {id:55,text:"Ongoing expenses list",area:"Bufala",tier:"t2",date:null,done:false},
-  {id:64,text:"Fix or redesign Bufala ecommerce",area:"Bufala",tier:"t2",date:null,done:false},
-  {id:65,text:"Dairy/creamery contact - San Mateo county",area:"Bufala",tier:"t2",date:null,done:false},
-  {id:68,text:"RFSI Forum - October Colorado",area:"Regen Ag",tier:"t2",date:"2026-10-01",done:false},
-  {id:82,text:"Meat box - find regenerative delivery service",area:"Regen Ag",tier:"t2",date:null,done:false},
-  {id:83,text:"Journal on Roblox and Dave lessons",area:"Personal",tier:"t2",date:null,done:false},
-  {id:87,text:"Rebecca - book facial/microneedling",area:"Personal",tier:"t2",date:null,done:false},
-  {id:94,text:"Grocery/meal planning app - refine",area:"Building",tier:"t2",date:null,done:false},
-  {id:95,text:"WhisperFlow - set up voice-to-text",area:"Building",tier:"t2",date:null,done:false},
-  {id:6,text:"House and car maintenance log",area:"Admin",tier:"t3",date:null,done:false},
-  {id:17,text:"Parents trip - plan",area:"Admin",tier:"t3",date:null,done:true,completedAt:"2026-06-09T00:00:00.000Z"},
-  {id:22,text:"Sound protection for X and E's rooms",area:"House",tier:"t3",date:null,done:false},
-  {id:44,text:"E - complete profile and assessment deep dive",area:"Family",tier:"t3",date:null,done:false},
-  {id:46,text:"Tony Robbins parenting framework + infographic",area:"Family",tier:"t3",date:null,done:false},
-  {id:47,text:"Family debate night - set up format",area:"Family",tier:"t3",date:null,done:false},
-  {id:48,text:"Movie nights - schedule recurring",area:"Family",tier:"t3",date:null,done:false},
-  {id:58,text:"Order management / inventory log",area:"Bufala",tier:"t3",date:null,done:false},
-  {id:59,text:"Batch production spreadsheet",area:"Bufala",tier:"t3",date:null,done:false},
-  {id:60,text:"Social media - water buffalo vs bison concept",area:"Bufala",tier:"t3",date:null,done:false},
-  {id:61,text:"Social media agent - AI-assisted content",area:"Bufala",tier:"t3",date:null,done:false},
-  {id:69,text:"Join groups in regen ag space",area:"Regen Ag",tier:"t3",date:null,done:false},
-  {id:70,text:"Explore regen ag investment syndicate",area:"Regen Ag",tier:"t3",date:null,done:false},
-  {id:71,text:"Regen ag class at Mt Carmel",area:"Regen Ag",tier:"t3",date:null,done:false},
-  {id:72,text:"Read - The Dorito Effect",area:"Regen Ag",tier:"t3",date:null,done:false},
-  {id:73,text:"Read - Sacred Cow",area:"Regen Ag",tier:"t3",date:null,done:false},
-  {id:74,text:"Read - The Big Fat Surprise",area:"Regen Ag",tier:"t3",date:null,done:false},
-  {id:75,text:"Read - Grass Productivity by Voisin",area:"Regen Ag",tier:"t3",date:null,done:false},
-  {id:76,text:"Listen - Food Fix Uncensored podcast",area:"Regen Ag",tier:"t3",date:null,done:false},
-  {id:77,text:"Course - understandingag.com Regen Ag 101",area:"Regen Ag",tier:"t3",date:null,done:false},
-  {id:79,text:"AI prompt - map food/ag advocacy businesses",area:"Regen Ag",tier:"t3",date:null,done:false},
-  {id:80,text:"Mind map - regen ag landscape + ideas",area:"Regen Ag",tier:"t3",date:null,done:false},
-  {id:85,text:"Immersive experience - research and commit",area:"Personal",tier:"t3",date:null,done:false},
-  {id:86,text:"Fermentation - research and run first experiment",area:"Personal",tier:"t3",date:null,done:false},
-  {id:88,text:"Achilles - volunteer at running event",area:"Personal",tier:"t3",date:null,done:false},
-  {id:89,text:"Banjo - actually practice",area:"Personal",tier:"t3",date:null,done:false},
-  {id:90,text:"Harmonica - actually practice",area:"Personal",tier:"t3",date:null,done:false},
-  {id:96,text:"Explore OpenClaw / GenSpark",area:"Building",tier:"t3",date:null,done:false},
-  {id:97,text:"Sauna and workout booking app",area:"Building",tier:"t3",date:null,done:false},
-  {id:99,text:"Mind map - overall life areas",area:"Building",tier:"t3",date:null,done:false},
-  {id:100,text:"Mind map - parenting principles",area:"Building",tier:"t3",date:null,done:false},
-  {id:7,text:"Glasses case - call to get it",area:"Admin",tier:"gy",date:null,done:false},
-  {id:9,text:"WaDrew shirt",area:"Admin",tier:"gy",date:null,done:false},
-  {id:10,text:"Drew hairspray",area:"Admin",tier:"gy",date:null,done:false},
-  {id:23,text:"Latch to hold back doors open",area:"House",tier:"gy",date:null,done:false},
-  {id:24,text:"Top door lock closed latch",area:"House",tier:"gy",date:null,done:false},
-  {id:25,text:"Smart electricity meter / PGE setup",area:"House",tier:"gy",date:null,done:false},
-  {id:28,text:"Wipe down outside of house",area:"House",tier:"gy",date:null,done:false},
-  {id:31,text:"Mood board for studio",area:"House",tier:"gy",date:null,done:false},
-  {id:32,text:"Jeep - new wheels",area:"House",tier:"gy",date:null,done:false},
-  {id:33,text:"Jeep - new front bumper",area:"House",tier:"gy",date:null,done:false},
-  {id:37,text:"Jeep - change rear seat belts",area:"House",tier:"gy",date:null,done:false},
-  {id:38,text:"Jeep - get drill/adapter front window",area:"House",tier:"gy",date:null,done:false},
-  {id:39,text:"Jeep - attach rear door fold-down cables",area:"House",tier:"gy",date:null,done:false},
-  {id:62,text:"Merch - new designs and print-on-demand",area:"Bufala",tier:"gy",date:null,done:false},
-  {id:63,text:"Logo tattoos - finalize design",area:"Bufala",tier:"gy",date:null,done:false},
-  {id:66,text:"Phoebe Lane / One Acre Fund - follow up",area:"Bufala",tier:"gy",date:null,done:false},
-  {id:78,text:"Research - Nutrition Coalition / Nina Teicholz",area:"Regen Ag",tier:"gy",date:null,done:false},
-  {id:81,text:"Research - Sacred Cow GASL follow-up",area:"Regen Ag",tier:"gy",date:null,done:false},
-  {id:84,text:"Tony Robbins coaching free trial",area:"Personal",tier:"gy",date:null,done:false},
-  {id:98,text:"Meal planning app analysis vs competitors",area:"Building",tier:"gy",date:null,done:false},
-  {id:101,text:"Studio wall - print and mount visuals",area:"Building",tier:"gy",date:null,done:false},
 ];
 
 let items = [];
@@ -266,13 +167,35 @@ let openDateId = null;
 let saveTimer = null;
 
 // ── Persistence ───────────────────────────────────────────────
+// The server (/api/items) is the shared source of truth across every device.
+// localStorage is kept only as an instant-paint cache and an offline fallback.
+let syncStatus = 'synced'; // 'synced' | 'saving' | 'offline'
+
+function syncLabel() {
+  if (syncStatus === 'saving') return 'Saving…';
+  if (syncStatus === 'offline') return 'Offline — saved on this device only';
+  return 'All changes saved';
+}
+function renderStatus() {
+  const el = document.getElementById('sync-status');
+  if (el) el.textContent = syncLabel();
+}
 function save() {
   clearTimeout(saveTimer);
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch {}
   saveTimer = setTimeout(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch {}
+    syncStatus = 'saving'; renderStatus();
+    fetch('/api/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(items)
+    }).then(r => {
+      if (!r.ok) throw new Error('save failed');
+      syncStatus = 'synced'; renderStatus();
+    }).catch(() => { syncStatus = 'offline'; renderStatus(); });
   }, 400);
 }
-function load() {
+function loadLocal() {
   try { const d = localStorage.getItem(STORAGE_KEY); if (d) return JSON.parse(d); } catch {}
   return null;
 }
@@ -548,7 +471,7 @@ function headerHtml() {
   return `<div class="header">
     <div>
       <div class="header-title">Kyle's board</div>
-      <div class="header-sub">All changes saved</div>
+      <div class="header-sub" id="sync-status">${syncLabel()}</div>
     </div>
     <div class="header-right">
       ${overdue.length?`<span class="badge badge-overdue">${overdue.length} overdue</span>`:''}
@@ -577,9 +500,30 @@ function render() {
 
 // ── Init ──────────────────────────────────────────────────────
 function init() {
-  const local = load();
+  const local = loadLocal();
+  // Paint instantly from whatever this device already has, then reconcile with the server.
   items = (local && local.length) ? local : SEED;
   render();
+
+  fetch('/api/items')
+    .then(r => r.json())
+    .then(serverItems => {
+      if (Array.isArray(serverItems) && serverItems.length) {
+        // Server already has shared data — that's the source of truth.
+        items = serverItems;
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch {}
+        syncStatus = 'synced';
+        render();
+      } else if (items.length) {
+        // Server has nothing yet — seed it from this device's current data.
+        return fetch('/api/items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(items)
+        });
+      }
+    })
+    .catch(() => { syncStatus = 'offline'; renderStatus(); });
 }
 
 init();
