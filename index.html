@@ -307,6 +307,20 @@
   .task-title {
     font-size: 13px;
     line-height: 1.4;
+    cursor: text;
+  }
+  .task-title-input {
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: inherit;
+    border: none;
+    border-bottom: 2px solid var(--accent);
+    background: transparent;
+    color: var(--text);
+    outline: none;
+    width: 100%;
+    padding: 0;
+    line-height: 1.4;
   }
 
   .task-type {
@@ -822,7 +836,7 @@ function renderTask(t) {
     <div class="task-row ${done ? 'done' : ''}" id="task-${t.id}">
       <input type="checkbox" class="task-check" ${done ? 'checked' : ''} 
         onchange="toggleTask(${t.id}, this.checked)">
-      <span class="task-title">${t.title}</span>
+      <span class="task-title" id="tt-${t.id}" onclick="startEditTask(${t.id})">${t.title}</span>
       <span class="task-type">${t.type}</span>
       <span class="priority-badge ${t.priority === 'Priority' ? '' : 'priority-blank'}">${t.priority === 'Priority' ? '⚑ Priority' : '–'}</span>
       <span class="task-due">${t.dueDate || ''}</span>
@@ -855,6 +869,33 @@ function toggleTask(id, done) {
     renderTasks();
     showToast(done ? `✓ "${task.title}" marked done` : `Reopened`);
   }
+}
+
+function startEditTask(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task || task.status === 'Done') return;
+  const span = document.getElementById('tt-' + id);
+  if (!span || span.querySelector('input')) return;
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = task.title;
+  input.className = 'task-title-input';
+
+  input.onblur = () => {
+    const trimmed = input.value.trim();
+    if (trimmed) task.title = trimmed;
+    renderTasks();
+  };
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') input.blur();
+    if (e.key === 'Escape') renderTasks();
+  };
+
+  span.textContent = '';
+  span.appendChild(input);
+  input.focus();
+  input.select();
 }
 
 function deleteTask(id) {
